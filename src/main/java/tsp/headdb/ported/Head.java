@@ -54,7 +54,7 @@ public class Head {
                 Utils.colorize("&cID: " + id),
                 Utils.colorize("&e" + buildTagLore(tags)),
                 "",
-                Utils.colorize("&8Right-Click to add/remove from favorites.")
+                Utils.colorize(TextInst.translatable("nbteditor.hdb.head.lore.favorite_hint").getString())
         ).stream().map(TextInst::of).toList());
         
         return item;

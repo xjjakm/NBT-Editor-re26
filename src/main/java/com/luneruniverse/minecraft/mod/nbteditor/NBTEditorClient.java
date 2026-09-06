@@ -100,6 +100,11 @@ public class NBTEditorClient implements ClientModInitializer {
 		} catch (IOException e) {
 			NBTEditor.LOGGER.error("Error while loading HeadDB favorites", e);
 		}
+		try {
+			HeadAPI.loadCustomHeads();
+		} catch (IOException e) {
+			NBTEditor.LOGGER.error("Error while loading HeadDB custom heads", e);
+		}
 		ContainerIOs.loadClass();
 		new HeadRefreshThread().start();
 		ConfigScreen.loadSettings();

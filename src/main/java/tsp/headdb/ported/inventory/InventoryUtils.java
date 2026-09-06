@@ -44,7 +44,7 @@ public class InventoryUtils {
     }
 
     public static void openLocalMenu() {
-        PagedPane pane = new PagedPane(4, 6, Utils.colorize("&c&lHeadDB &8- &aLocal Heads"));
+        PagedPane pane = new PagedPane(4, 6, TextInst.translatable("nbteditor.hdb.local.title").getString());
 
         List<LocalHead> heads = HeadAPI.getLocalHeads();
         for (LocalHead localHead : heads) {
@@ -58,8 +58,32 @@ public class InventoryUtils {
                     return;
                 }
                 if (e.getContainerInput() == ClickTypeMod.RIGHT) {
-//                    player.closeInventory();
-                    Utils.sendMessage("&cLocal heads can not be added to favorites!");
+                    MainUtil.client.player.sendSystemMessage(TextInst.translatable("nbteditor.hdb.feedback.local_no_favorites"));
+                }
+            }));
+        }
+
+        pane.open();
+    }
+
+    public static void openCustomMenu() {
+        PagedPane pane = new PagedPane(4, 6, TextInst.translatable("nbteditor.hdb.custom.title").getString());
+
+        List<Head> heads = HeadAPI.getCustomHeads();
+        for (Head head : heads) {
+            pane.addButton(new Button(head.getItemStack(), e -> {
+                if (e.getContainerInput() == ClickTypeMod.LEFT_SHIFT) {
+                    purchaseHead(head, 64, "custom", head.getName());
+                    return;
+                }
+                if (e.getContainerInput() == ClickTypeMod.LEFT) {
+                    purchaseHead(head, 1, "custom", head.getName());
+                    return;
+                }
+                if (e.getContainerInput() == ClickTypeMod.RIGHT) {
+                    HeadAPI.removeCustomHead(head.getValue());
+                    openCustomMenu();
+                    MainUtil.client.player.sendSystemMessage(TextInst.translatable("nbteditor.hdb.feedback.removed_custom", head.getName()));
                 }
             }));
         }
@@ -68,22 +92,22 @@ public class InventoryUtils {
     }
 
     public static void openFavoritesMenu() {
-        PagedPane pane = new PagedPane(4, 6, Utils.colorize("&c&lHeadDB &8- &eFavorites"));
+        PagedPane pane = new PagedPane(4, 6, TextInst.translatable("nbteditor.hdb.favorites.title").getString());
 
         List<Head> heads = HeadAPI.getFavoriteHeads();
         for (Head head : heads) {
             pane.addButton(new Button(head.getItemStack(), e -> {
                 if (e.getContainerInput() == ClickTypeMod.LEFT_SHIFT) {
-                    purchaseHead(head, 64, head.getCategory().getName(), head.getName());
+                    purchaseHead(head, 64, HeadAPI.getCategoryName(head), head.getName());
                     return;
                 }
                 if (e.getContainerInput() == ClickTypeMod.LEFT) {
-                    purchaseHead(head, 1, head.getCategory().getName(), head.getName());
+                    purchaseHead(head, 1, HeadAPI.getCategoryName(head), head.getName());
                 }
                 if (e.getContainerInput() == ClickTypeMod.RIGHT) {
                     HeadAPI.removeFavoriteHead(head.getValue());
                     openFavoritesMenu();
-                    Utils.sendMessage("Removed &e" + head.getName() + " &7from favorites.");
+                    MainUtil.client.player.sendSystemMessage(TextInst.translatable("nbteditor.hdb.feedback.removed_favorite", head.getName()));
                 }
             }));
         }
@@ -92,7 +116,7 @@ public class InventoryUtils {
     }
 
     public static PagedPane openSearchDatabase(String search) {
-        PagedPane pane = new PagedPane(4, 6, Utils.colorize("&c&lHeadDB &8- &eSearch: " + search));
+        PagedPane pane = new PagedPane(4, 6, TextInst.translatable("nbteditor.hdb.search.title", search).getString());
 
         List<Head> heads = HeadAPI.getHeadsByName(search);
         for (Head head : heads)
@@ -103,7 +127,7 @@ public class InventoryUtils {
     }
 
     public static void openTagSearchDatabase(String tag) {
-        PagedPane pane = new PagedPane(4, 6, Utils.colorize("&c&lHeadDB &8- &eTag Search: " + tag));
+        PagedPane pane = new PagedPane(4, 6, TextInst.translatable("nbteditor.hdb.tags.title", tag).getString());
 
         List<Head> heads = HeadAPI.getHeadsByTag(tag);
         for (Head head : heads) {
@@ -136,45 +160,49 @@ public class InventoryUtils {
     }
 
     public static void openDatabase() {
-    	ClientHandledScreen screen = new ClientHandledScreen(6,
-    			TextInst.of(Utils.colorize("&c&lHeadDB &8(" + HeadAPI.getHeads().size() + ")"))) {
-    		@Override
-    		protected void slotClicked(Slot slot, int slotId, int button, ContainerInput actionType) {
-    			if (slot == null)
-    				return;
-    			slotId = slot.index;
-    			
-    			Container inventory = this.menu.getContainer();
-    			
-                if (inventory != null) {
-                    ItemStack item = slot.getItem();
+	    	ClientHandledScreen screen = new ClientHandledScreen(6,
+	    			TextInst.translatable("nbteditor.hdb.main.title", HeadAPI.getHeads().size())) {
+	    		@Override
+	    		protected void slotClicked(Slot slot, int slotId, int button, ContainerInput actionType) {
+	    			if (slot == null)
+	    				return;
+	    			slotId = slot.index;
+	    			
+	    			Container inventory = this.menu.getContainer();
+	    			
+	                if (inventory != null) {
+	                    ItemStack item = slot.getItem();
 
-                    if (item != null && !item.isEmpty()) {
-                        String name = MainUtil.stripColor(item.getHoverName().getString().toLowerCase());
-                        if (name.equalsIgnoreCase("favorites")) {
-                            InventoryUtils.openFavoritesMenu();
-                            return;
-                        }
-                        if (name.equalsIgnoreCase("local")) {
-                            InventoryUtils.openLocalMenu();
-                            return;
-                        }
-                        if (name.equalsIgnoreCase("search")) {
-                        	InputOverlay.show(
-                        			TextInst.of("Search"),
-                        			StringInput.builder().withPlaceholder(TextInst.of("Query")).build(),
-                        			InventoryUtils::openSearchDatabase);
-                            return;
-                        }
+	                    if (item != null && !item.isEmpty()) {
+	                        if (slotId == getUILocation("favorites", 39)) {
+	                            InventoryUtils.openFavoritesMenu();
+	                            return;
+	                        }
+	                        if (slotId == getUILocation("local", 41)) {
+	                            InventoryUtils.openLocalMenu();
+	                            return;
+	                        }
+	                        if (slotId == getUILocation("custom", 42)) {
+	                            InventoryUtils.openCustomMenu();
+	                            return;
+	                        }
+	                        if (slotId == getUILocation("search", 40)) {
+	                        	InputOverlay.show(
+	                        			TextInst.translatable("nbteditor.hdb.search"),
+	                        			StringInput.builder().withPlaceholder(TextInst.of("Query")).build(),
+	                        			InventoryUtils::openSearchDatabase);
+	                            return;
+	                        }
 
-                        Category category = Category.getByName(name);
+	                        String name = MainUtil.stripColor(item.getHoverName().getString().toLowerCase());
+	                        Category category = Category.getByName(name);
 
-                        if (category != null) {
-                            HeadAPI.openCategoryDatabase(category);
-                        }
-                    }
-                }
-    		}
+	                        if (category != null) {
+	                            HeadAPI.openCategoryDatabase(category);
+	                        }
+	                    }
+	                }
+	    		}
     		@Override
     		public void onClose() {
     			if (MainUtil.client.player != null)
@@ -193,23 +221,30 @@ public class InventoryUtils {
 
         inventory.setItem(getUILocation("favorites", 39), buildButton(
             getUIItem("favorites", new ItemStack(Items.BOOK)),
-            "&eFavorites",
+            TextInst.translatable("nbteditor.hdb.button.favorites").getString(),
             "",
-            "&8Click to view your favorites")
+            TextInst.translatable("nbteditor.hdb.lore.favorites").getString())
         );
 
         inventory.setItem(getUILocation("search", 40), buildButton(
             getUIItem("search", new ItemStack(Items.DARK_OAK_SIGN)),
-            "&9Search",
+            TextInst.translatable("nbteditor.hdb.button.search").getString(),
             "",
-            "&8Click to open search menu")
+            TextInst.translatable("nbteditor.hdb.lore.search").getString())
         );
 
         inventory.setItem(getUILocation("local", 41), buildButton(
             getUIItem("local", new ItemStack(Items.COMPASS)),
-            "&aLocal",
+            TextInst.translatable("nbteditor.hdb.button.local").getString(),
             "",
-            "&8Online Players")
+            TextInst.translatable("nbteditor.hdb.lore.local").getString())
+        );
+
+        inventory.setItem(getUILocation("custom", 42), buildButton(
+            getUIItem("custom", new ItemStack(Items.FILLED_MAP)),
+            TextInst.translatable("nbteditor.hdb.button.custom").getString(),
+            "",
+            TextInst.translatable("nbteditor.hdb.lore.custom").getString())
         );
 
         fill(inventory);

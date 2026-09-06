@@ -45,7 +45,8 @@ public class CommandHandler {
 			ClientChestCommand.INSTANCE,
 			OpenCommand.INSTANCE,
 			GetCommand.INSTANCE,
-			FactoryCommand.INSTANCE)
+			FactoryCommand.INSTANCE,
+			HeadDBCommand.INSTANCE)
 			.collect(Collectors.toUnmodifiableMap(ClientCommand::getName, cmd -> cmd));
 	
 }

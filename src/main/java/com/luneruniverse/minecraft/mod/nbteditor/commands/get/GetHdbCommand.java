@@ -8,12 +8,15 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricCli
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.hideflags.HideFlag;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -26,6 +29,7 @@ import tsp.headdb.ported.HeadAPI;
 import tsp.headdb.ported.inventory.InventoryUtils;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.argument;
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
@@ -53,6 +57,15 @@ public class GetHdbCommand extends ClientCommand {
 
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
+		registerHdbSubCommands(builder);
+		builder.executes(context -> {
+			if (HeadAPI.checkUpdated())
+				HeadAPI.openDatabase();
+			return Command.SINGLE_SUCCESS;
+		});
+	}
+
+	public static void registerHdbSubCommands(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
 		builder.then(literal("search").then(argument("query", StringArgumentType.greedyString()).executes(context -> {
 					if (HeadAPI.checkUpdated())
 						HeadAPI.openSearchDatabase(context.getArgument("query", String.class));
@@ -115,11 +128,40 @@ public class GetHdbCommand extends ClientCommand {
 					thread.start();
 					return Command.SINGLE_SUCCESS;
 				}))
-				.executes(context -> {
-					if (HeadAPI.checkUpdated())
-						HeadAPI.openDatabase();
+				.then(literal("player").then(argument("name", StringArgumentType.word()).executes(context -> {
+					String name = context.getArgument("name", String.class);
+					if (!StringUtil.isValidPlayerName(name)) {
+						context.getSource().sendFeedback(TextInst.translatable("nbteditor.hdb.player.invalid_name", name));
+						return Command.SINGLE_SUCCESS;
+					}
+					context.getSource().sendFeedback(TextInst.translatable("nbteditor.hdb.player.searching", name));
+					HeadAPI.getPlayerHeadAsync(name,
+							head -> InventoryUtils.purchaseHead(head, 1, "player", head.getName()),
+							error -> context.getSource().sendFeedback(TextInst.translatable("nbteditor.hdb.player." + error, name)));
 					return Command.SINGLE_SUCCESS;
-				});
+				})))
+				.then(literal("save")
+						.executes(context -> saveHeldHead(context.getSource(), null))
+						.then(argument("name", StringArgumentType.word()).executes(context ->
+								saveHeldHead(context.getSource(), context.getArgument("name", String.class)))));
+	}
+
+	private static int saveHeldHead(FabricClientCommandSource source, String customName) {
+		ItemStack item = MainUtil.client.player.getMainHandItem();
+		Optional<GameProfile> profile = ItemTagReferences.PROFILE.get(item);
+		String value = null;
+		if (!profile.isEmpty()) {
+			for (Property property : profile.get().properties().get("textures"))
+				value = property.value();
+		}
+		if (value == null || value.isEmpty()) {
+			source.sendFeedback(TextInst.translatable("nbteditor.hdb.custom.not_player_head"));
+			return Command.SINGLE_SUCCESS;
+		}
+		HeadAPI.addCustomHead(value);
+		source.sendFeedback(TextInst.translatable("nbteditor.hdb.custom.saved",
+				customName != null ? customName : HeadAPI.parseHeadName(value)));
+		return Command.SINGLE_SUCCESS;
 	}
 	
 }

@@ -2,14 +2,19 @@ package tsp.headdb.ported;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -159,6 +164,9 @@ public final class HeadAPI {
     private static final File FAVORITES_FILE = new File(NBTEditorClient.SETTINGS_FOLDER, "headdb_favorites.txt");
     private static final List<String> FAVORITES = new ArrayList<>();
     
+    private static final File CUSTOM_FILE = new File(NBTEditorClient.SETTINGS_FOLDER, "headdb_custom.txt");
+    private static final List<String> CUSTOM_HEADS = new ArrayList<>();
+    
     /**
      * Add a {@link Head} to a players favorites
      *
@@ -185,10 +193,10 @@ public final class HeadAPI {
     public static void toggleFavoriteHead(Head head) {
     	if (FAVORITES.contains(head.getValue())) {
     		removeFavoriteHead(head.getValue());
-    		Utils.sendMessage("Removed &e" + head.getName() + " &7from favorites.");
+    		MainUtil.client.player.sendSystemMessage(TextInst.translatable("nbteditor.hdb.feedback.removed_favorite", head.getName()));
     	} else {
     		addFavoriteHead(head.getValue());
-    		Utils.sendMessage("Added &e" + head.getName() + " &7to favorites.");
+    		MainUtil.client.player.sendSystemMessage(TextInst.translatable("nbteditor.hdb.feedback.added_favorite", head.getName()));
     	}
     }
     
@@ -240,6 +248,71 @@ public final class HeadAPI {
 			NBTEditor.LOGGER.error("Error while saving HeadDB favorites", e);
 		}
     }
+    
+    /**
+     * Add a {@link Head} to the local custom head library
+     *
+     * @param value The texture value of the head
+     */
+    public static void addCustomHead(String value) {
+    	if (CUSTOM_HEADS.contains(value))
+    		return;
+    	
+    	CUSTOM_HEADS.add(value);
+    	saveCustomHeads();
+    }
+
+    /**
+     * Remove a {@link Head} from the local custom head library
+     *
+     * @param value The texture value of the head
+     */
+    public static void removeCustomHead(String value) {
+    	if (CUSTOM_HEADS.remove(value))
+    		saveCustomHeads();
+    }
+    
+    /**
+     * Load the local custom head library from disk
+     */
+    public static void loadCustomHeads() throws IOException {
+    	CUSTOM_HEADS.clear();
+    	
+    	if (!CUSTOM_FILE.exists())
+    		return;
+    	
+    	String heads = new String(Files.readAllBytes(CUSTOM_FILE.toPath())).replace("\r", "");
+    	if (!heads.startsWith("v1\n"))
+    		return;
+    	
+    	JsonArray headsArray = new Gson().fromJson(heads.substring("v1\n".length()), JsonArray.class);
+    	for (JsonElement head : headsArray)
+    		CUSTOM_HEADS.add(head.getAsString());
+    }
+    
+    private static void saveCustomHeads() {
+    	JsonArray output = new JsonArray();
+    	for (String customHead : CUSTOM_HEADS)
+    		output.add(customHead);
+    	try {
+    		Files.write(CUSTOM_FILE.toPath(), ("v1\n" + output.toString()).getBytes());
+    	} catch (IOException e) {
+    		NBTEditor.LOGGER.error("Error while saving HeadDB custom heads", e);
+    	}
+    }
+
+    /**
+     * Retrieve a {@link List} of heads in the local custom head library
+     *
+     * @return List of {@link Head}'s
+     */
+    public static List<Head> getCustomHeads() {
+        List<Head> heads = new ArrayList<>();
+        for (String customHead : CUSTOM_HEADS)
+            heads.add(buildCustomHead(customHead));
+        
+        return heads;
+    }
 
     /**
      * Retrieve a {@link List} of favorite {@link Head} for a player
@@ -253,7 +326,8 @@ public final class HeadAPI {
         	if (favorite.startsWith("LEGACY: ")) // Legacy favorites should already be resolved
         		continue;
             
-            heads.add(getHeadByValue(favorite));
+            Head head = getHeadByValue(favorite);
+            heads.add(head != null ? head : buildCustomHead(favorite));
         }
         
         return heads;
@@ -273,6 +347,103 @@ public final class HeadAPI {
         }
 
         return heads;
+    }
+
+    /**
+     * Parse the display name from a head texture value (base64 encoded profile JSON)
+     *
+     * @param value The texture value
+     * @return The player name, or null if it could not be parsed
+     */
+    public static String parseHeadName(String value) {
+        try {
+            String json = new String(Base64.getDecoder().decode(value), StandardCharsets.UTF_8);
+            JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
+            if (obj.has("name") && !obj.get("name").isJsonNull())
+                return obj.get("name").getAsString();
+            if (obj.has("profileName") && !obj.get("profileName").isJsonNull())
+                return obj.get("profileName").getAsString();
+        } catch (Exception e) {
+            NBTEditor.LOGGER.warn("Failed to parse head value name", e);
+        }
+        return null;
+    }
+
+    /**
+     * Builds a {@link Head} from a texture value, falling back to a self-contained custom head
+     * when the value is not part of the official database
+     *
+     * @param value The texture value
+     * @return A head, never null
+     */
+    public static Head buildCustomHead(String value) {
+        Head official = getHeadByValue(value);
+        if (official != null)
+            return official;
+        String name = parseHeadName(value);
+        UUID uuid = UUID.nameUUIDFromBytes(value.getBytes(StandardCharsets.UTF_8));
+        return new Head(-1)
+                .withName(name != null ? name : "Custom Head")
+                .withUniqueId(uuid)
+                .withValue(value);
+    }
+
+    /**
+     * Returns the category name of a head, falling back to "custom" when it has no category.
+     */
+    public static String getCategoryName(Head head) {
+        Category category = head.getCategory();
+        return category != null ? category.getName() : "custom";
+    }
+
+    /**
+     * Asynchronously queries a player head by their Minecraft username via the Mojang API.
+     * Network requests run on a daemon thread, callbacks are dispatched on the client thread.
+     *
+     * @param name The player name to query
+     * @param success Called with the resulting {@link Head} on success (never null)
+     * @param error Called with an error key ("not_found", "no_textures" or "error") on failure
+     */
+    public static void getPlayerHeadAsync(String name, Consumer<Head> success, Consumer<String> error) {
+        Thread thread = new Thread(() -> {
+            try {
+                String profileJson = getDatabase().fetch("https://api.mojang.com/users/profiles/minecraft/" + name);
+                JsonObject profile = JsonParser.parseString(profileJson).getAsJsonObject();
+                if (profile == null || !profile.has("id")) {
+                    MainUtil.client.execute(() -> error.accept("not_found"));
+                    return;
+                }
+                String uuid = profile.get("id").getAsString();
+                String dashed = uuid.replaceFirst("(.{8})(.{4})(.{4})(.{4})(.{12})", "$1-$2-$3-$4-$5");
+
+                String sessionJson = getDatabase().fetch(
+                        "https://sessionserver.mojang.com/session/minecraft/profile/" + dashed);
+                Head head = null;
+                JsonArray properties = JsonParser.parseString(sessionJson).getAsJsonObject().getAsJsonArray("properties");
+                for (JsonElement element : properties) {
+                    JsonObject property = element.getAsJsonObject();
+                    if ("textures".equals(property.get("name").getAsString())) {
+                        head = new Head(-1)
+                                .withName(profile.get("name").getAsString())
+                                .withUniqueId(UUID.fromString(dashed))
+                                .withValue(property.get("value").getAsString());
+                        break;
+                    }
+                }
+                Head result = head;
+                MainUtil.client.execute(() -> {
+                    if (result != null)
+                        success.accept(result);
+                    else
+                        error.accept("no_textures");
+                });
+            } catch (Exception e) {
+                NBTEditor.LOGGER.error("Failed to fetch player head for " + name, e);
+                MainUtil.client.execute(() -> error.accept("error"));
+            }
+        }, "NBTEditor/HeadPlayer");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     /**

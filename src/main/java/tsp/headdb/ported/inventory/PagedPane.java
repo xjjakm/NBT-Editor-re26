@@ -210,51 +210,31 @@ public class PagedPane extends ClientHandledScreen {
         );
 
         if (getCurrentPage() > 1) {
-            String name = String.format(
-                    Locale.ROOT,
-                    "&3&lPage &a&l%d &7/ &c&l%d",
-                    getCurrentPage() - 1, getPageAmount()
-            );
-            String lore = String.format(
-                    Locale.ROOT,
-                    "&7Previous: &c%d",
-                    getCurrentPage() - 1
-            );
+            String name = TextInst.translatable("nbteditor.hdb.page.format", getCurrentPage() - 1, getPageAmount()).getString();
+            String lore = TextInst.translatable("nbteditor.hdb.page.previous", getCurrentPage() - 1).getString();
             ItemStack itemStack = setMeta(HeadAPI.getHeadByValue("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODY1MmUyYjkzNmNhODAyNmJkMjg2NTFkN2M5ZjI4MTlkMmU5MjM2OTc3MzRkMThkZmRiMTM1NTBmOGZkYWQ1ZiJ9fX0=").getItemStack(), name, lore);
             controlBack = new Button(itemStack, event -> selectPage(currentIndex - 1));
             inventory.setItem(inventory.getContainerSize() - 8, itemStack);
         }
 
         if (getCurrentPage() < getPageAmount()) {
-            String name = String.format(
-                    Locale.ROOT,
-                    "&3&lPage &a&l%d &7/ &c&l%d",
-                    getCurrentPage() + 1, getPageAmount()
-            );
-            String lore = String.format(
-                    Locale.ROOT,
-                    "&7Next: &c%d",
-                    getCurrentPage() + 1
-            );
+            String name = TextInst.translatable("nbteditor.hdb.page.format", getCurrentPage() + 1, getPageAmount()).getString();
+            String lore = TextInst.translatable("nbteditor.hdb.page.next", getCurrentPage() + 1).getString();
             ItemStack itemStack = setMeta(HeadAPI.getHeadByValue("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0=").getItemStack(), name, lore);
             controlNext = new Button(itemStack, event -> selectPage(getCurrentPage()));
             inventory.setItem(inventory.getContainerSize() - 2, itemStack);
         }
 
         {
-            String name = String.format(
-                    Locale.ROOT,
-                    "&3&lPage &a&l%d &7/ &c&l%d",
-                    getCurrentPage(), getPageAmount()
-            );
+            String name = TextInst.translatable("nbteditor.hdb.page.format", getCurrentPage(), getPageAmount()).getString();
             ItemStack itemStack = setMeta(HeadAPI.getHeadByValue("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2Q5MWY1MTI2NmVkZGM2MjA3ZjEyYWU4ZDdhNDljNWRiMDQxNWFkYTA0ZGFiOTJiYjc2ODZhZmRiMTdmNGQ0ZSJ9fX0=").getItemStack(),
                     name,
-                    "&7Left-Click to go to the &cMain Menu",
-                    "&7Right-Click to go to a &6Specific Page");
+                    TextInst.translatable("nbteditor.hdb.page.main_menu").getString(),
+                    TextInst.translatable("nbteditor.hdb.page.specific_page").getString());
             controlMain = new Button(itemStack, event -> {
                 if (event.getContainerInput() == ClickTypeMod.RIGHT) {
                 	InputOverlay.show(
-                			TextInst.of("Go to a Specific Page"),
+                			TextInst.translatable("nbteditor.hdb.page.goto_title"),
                 			StringInput.builder()
                 					.withPlaceholder(TextInst.of("Page #"))
                 					.withValidator(MainUtil.intPredicate(1, getPageAmount(), false))

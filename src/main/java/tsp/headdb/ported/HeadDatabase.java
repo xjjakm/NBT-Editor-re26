@@ -25,6 +25,14 @@ public class HeadDatabase {
     private long updated;
     private int id;
 
+    private volatile boolean loading;
+    private volatile int loadedCategories;
+    private volatile int totalCategories;
+    private volatile String currentCategory;
+    private volatile boolean lastLoadFailed;
+    private volatile long lastLoadStart;
+    private volatile long lastLoadEnd;
+
     public HeadDatabase() {
         this.refresh = 3600;
         this.timeout = 5000;
@@ -146,14 +154,21 @@ public class HeadDatabase {
     public Map<Category, List<Head>> getHeadsNoCache() {
         Map<Category, List<Head>> result = new HashMap<>();
         Category[] categories = Category.getValues();
+        totalCategories = categories.length;
+        loadedCategories = 0;
+        lastLoadFailed = false;
+        loading = true;
+        lastLoadStart = System.nanoTime();
 
-        for (Category category : categories) {
-            NBTEditor.LOGGER.debug("Caching heads from: " + category.getName());
+        for (int i = 0; i < categories.length; i++) {
+            Category category = categories[i];
+            currentCategory = category.getName();
+            NBTEditor.LOGGER.info("Caching heads from: " + category.getName());
             List<Head> heads = new ArrayList<>();
             try {
                 heads = gather("https://minecraft-heads.com/scripts/api.php?cat=" + category.getName() + "&tags=true", category);
             } catch (JsonParseException | IOException e) {
-                NBTEditor.LOGGER.error("Failed to fetch heads (no-cache) | Stack Trace:");
+                NBTEditor.LOGGER.error("Failed to fetch heads (no-cache) for " + category.getName() + " | Stack Trace:");
                 NBTEditor.LOGGER.error(e);
                 
                 NBTEditor.LOGGER.info("Attempting fallback provider for: " + category.getName());
@@ -161,17 +176,78 @@ public class HeadDatabase {
                     // If the original fails and fallback is enabled, fetch from static archive
                     heads = gather("https://heads.pages.dev/archive/" + category.getName() + ".json", category);
                 } catch (IOException | JsonParseException ex) {
-                	NBTEditor.LOGGER.error("Failed to fetch heads for " + category.getName() + "! (OF)"); // OF = Original-Fallback, both failed
-                	NBTEditor.LOGGER.error(ex);
-                	return null;
+                    NBTEditor.LOGGER.error("Failed to fetch heads for " + category.getName() + "! (OF)"); // OF = Original-Fallback, both failed
+                    NBTEditor.LOGGER.error(ex);
+                    loading = false;
+                    lastLoadFailed = true;
+                    lastLoadEnd = System.nanoTime();
+                    return null;
                 }
             }
 
             result.put(category, heads);
+            loadedCategories = i + 1;
         }
 
         updated = System.nanoTime();
+        loading = false;
+        currentCategory = null;
+        lastLoadEnd = System.nanoTime();
         return result;
+    }
+
+    /**
+     * @return True if the database is currently being (re)loaded
+     */
+    public boolean isLoading() {
+        return loading;
+    }
+
+    /**
+     * @return The amount of categories loaded so far (informational during loading)
+     */
+    public int getLoadedCategories() {
+        return loadedCategories;
+    }
+
+    /**
+     * @return The amount of categories in total
+     */
+    public int getTotalCategories() {
+        return totalCategories;
+    }
+
+    /**
+     * @return The name of the category that is currently being fetched, or null if not loading
+     */
+    public String getCurrentCategory() {
+        return currentCategory;
+    }
+
+    /**
+     * @return True if the last load attempt failed on every source
+     */
+    public boolean wasLastLoadFailed() {
+        return lastLoadFailed;
+    }
+
+    /**
+     * @return The amount of time the last load took, in milliseconds, or -1 if no load has finished yet
+     */
+    public long getLastLoadDuration() {
+        if (lastLoadStart == 0 || lastLoadEnd == 0)
+            return -1;
+        return TimeUnit.NANOSECONDS.toMillis(lastLoadEnd - lastLoadStart);
+    }
+
+    /**
+     * @return The amount of cached heads (read-only, never triggers a download)
+     */
+    public int getLoadedHeadCount() {
+        int count = 0;
+        for (List<Head> list : HEADS.values())
+            count += list.size();
+        return count;
     }
 
     /**
@@ -213,7 +289,7 @@ public class HeadDatabase {
         }
 
         long elapsed = (System.currentTimeMillis() - start);
-        NBTEditor.LOGGER.debug(category.getName() + " -> Done! Time: " + elapsed + "ms (" + TimeUnit.MILLISECONDS.toSeconds(elapsed) + "s)");
+        NBTEditor.LOGGER.info(category.getName() + " -> Done! Time: " + elapsed + "ms (" + TimeUnit.MILLISECONDS.toSeconds(elapsed) + "s)");
         return heads;
     }
 
