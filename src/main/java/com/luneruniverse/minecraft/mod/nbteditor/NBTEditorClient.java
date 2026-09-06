@@ -9,6 +9,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVEnchantments;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
@@ -22,6 +23,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -76,8 +78,23 @@ public class NBTEditorClient implements ClientModInitializer {
 			ItemStack inventoryIcon = new ItemStack(Items.CHEST);
 			inventoryIcon.set(DataComponents.CUSTOM_NAME, TextInst.translatable("itemGroup.nbteditor.inventory"));
 
-			MVEnchantments.addEnchantment(clientChestIcon, MVEnchantments.LOYALTY, 1);
-			MixinLink.ENCHANT_GLINT_FIX.add(clientChestIcon);
+			// 26.x：用 enchantment_glint_override 数据组件强制显示附魔光效；旧版本回退到忠诚附魔
+			boolean glintOverrideApplied = false;
+			try {
+				DataComponentType<Boolean> glintOverride = (DataComponentType<Boolean>) Reflection
+						.getField(DataComponents.class, "ENCHANTMENT_GLINT_OVERRIDE", "Lnet/minecraft/core/component/DataComponentType;")
+						.get(null);
+				if (glintOverride != null) {
+					clientChestIcon.set(glintOverride, true);
+					glintOverrideApplied = true;
+				}
+			} catch (Exception e) {
+				NBTEditor.LOGGER.warn("Failed to apply enchantment glint override for the client chest tab", e);
+			}
+			if (!glintOverrideApplied)
+				MVEnchantments.addEnchantment(clientChestIcon, MVEnchantments.LOYALTY, 1);
+			NBTEditor.LOGGER.warn("[tab-debug] client chest tab: overrideApplied={}, hasFoil={}, components={}",
+					glintOverrideApplied, clientChestIcon.hasFoil(), clientChestIcon.getComponents());
 			NBTEditorAPI.registerInventoryTab(clientChestIcon,
 					ClientChestScreen::show,
 					screen -> screen instanceof CreativeModeInventoryScreen || (screen instanceof InventoryScreen && SERVER_CONN.isEditingExpanded()));
@@ -86,7 +103,10 @@ public class NBTEditorClient implements ClientModInitializer {
 					screen -> screen instanceof ClientChestScreen);
 			NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST),
 					() -> {
-						CURSOR_MANAGER.closeRoot();
+						// 只在客户端物品栏界面（纯客户端菜单）需要手动关闭；普通背包/创造界面直接发包，
+						// 由服务端打开末影箱菜单自然切换界面（与 /open echest 指令行为一致）
+						if (MainUtil.client.gui.screen() instanceof ClientChestScreen)
+							CURSOR_MANAGER.closeRoot();
 						MVClientNetworking.send(new OpenEnderChestC2SPacket());
 					},
 					screen -> (screen instanceof CreativeModeInventoryScreen || screen instanceof InventoryScreen || screen instanceof ClientChestScreen)

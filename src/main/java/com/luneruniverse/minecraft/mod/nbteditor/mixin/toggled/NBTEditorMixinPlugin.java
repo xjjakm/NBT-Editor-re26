@@ -75,6 +75,9 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 				.range("1.21.5", null, () -> output.add("toggled.SnbtGrammarMixin"))
 				.range(null, "1.21.4", () -> output.add("toggled.TagParserMixin"))
 				.run();
+		Version.newSwitch()
+				.range("26.0", null, () -> output.add("toggled.ChestSpecialRendererMixin"))
+				.run();
 	}
 	
 }
