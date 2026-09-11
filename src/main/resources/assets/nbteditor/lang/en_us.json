@@ -295,6 +295,7 @@
 	
 	"nbteditor.enchantments": "Enchantments",
 	"nbteditor.enchantments.enchantment": "Enchantment",
+	"nbteditor.enchantments.select": "Select Enchantment",
 	"nbteditor.enchantments.level": "Level",
 	"nbteditor.enchantments.tip": "You can Ctrl+Click enchanted books onto items in supported inventories",
 	

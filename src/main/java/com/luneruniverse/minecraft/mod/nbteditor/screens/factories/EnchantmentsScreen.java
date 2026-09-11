@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 	
 	@SuppressWarnings("unchecked")
-	private static ConfigValueDropdown<String> getConfigEnchantment(ConfigCategory enchant) {
-		return ((ConfigItem<ConfigValueDropdown<String>>) enchant.getConfigurable("enchantment")).getValue();
+	private static ConfigValueOverlay<String> getConfigEnchantment(ConfigCategory enchant) {
+		return ((ConfigItem<ConfigValueOverlay<String>>) enchant.getConfigurable("enchantment")).getValue();
 	}
 	@SuppressWarnings("unchecked")
 	private static ConfigValueNumber<Integer> getConfigLevel(ConfigCategory enchant) {
@@ -74,8 +74,10 @@ public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 				.map(Map.Entry::getKey).toList();
 		String firstEnchant = orderedEnchants.get(0);
 		entry.setConfigurable("enchantment", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.enchantment"),
-				ConfigValueDropdown.forList(firstEnchant, firstEnchant, orderedEnchants,
-				sortedDisplayNameToId.entrySet().stream().filter(enchant -> allEnchantments.get(enchant.getValue()).value().canEnchant(inputItem)).map(Map.Entry::getKey).toList())));
+				ConfigValueOverlay.forList(TextInst.translatable("nbteditor.enchantments.select"), firstEnchant, firstEnchant,
+						orderedEnchants,
+						name -> allEnchantments.get(sortedDisplayNameToId.getOrDefault(name, name)).value().canEnchant(inputItem),
+						name -> name + " (" + sortedDisplayNameToId.getOrDefault(name, name) + ")")));
 		entry.setConfigurable("level", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.level"),
 				ConfigValueNumber.forInt(1, 1, 1,
 						Version.<Integer>newSwitch()

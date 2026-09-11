@@ -270,6 +270,7 @@
 	
 	"nbteditor.enchantments": "附魔",
 	"nbteditor.enchantments.enchantment": "附魔",
+	"nbteditor.enchantments.select": "選擇附魔",
 	"nbteditor.enchantments.level": "等級",
 	"nbteditor.enchantments.tip": "您可以按住 Ctrl 並點擊附魔書到支援的物品欄中的物品上",
 	

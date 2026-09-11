@@ -295,6 +295,7 @@
 	
 	"nbteditor.enchantments": "物品附魔",
 	"nbteditor.enchantments.enchantment": "附魔",
+	"nbteditor.enchantments.select": "选择附魔",
 	"nbteditor.enchantments.level": "等级",
 	"nbteditor.enchantments.tip": "你可以在支持的容器中按住 CTRL 使用附魔书点击物品来附魔",
 	
