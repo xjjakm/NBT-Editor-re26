@@ -60,6 +60,8 @@ public class LocalFactoryScreen<L extends LocalNBT> extends LocalEditorScreen<L>
 		addFactory("nbteditor.block_states", BlockStatesCommand.BLOCK_FILTER, BlockStatesScreen::new);
 		addFactory("nbteditor.villager", ref -> ref instanceof EntityReference && ((EntityReference) ref).getEntityType() == EntityTypes.VILLAGER,
 				VillagerScreen::new, EntityReference.class);
+		addFactory("nbteditor.entity_attributes", ref -> ref instanceof EntityReference,
+				EntityAttributesScreen::new, EntityReference.class);
 	}
 	
 	private final ConfigCategory config;
