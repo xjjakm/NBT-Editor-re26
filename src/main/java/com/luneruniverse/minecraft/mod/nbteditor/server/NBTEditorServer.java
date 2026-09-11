@@ -37,7 +37,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvents.Start {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger("NBTEditor");
 	
 	public static final int PROTOCOL_VERSION = 1;
 	public static boolean IS_DEDICATED = true;
@@ -200,6 +205,8 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onSetEntityPacket(SetEntityC2SPacket packet, ServerPlayer player) {
+		LOGGER.info("[set-entity] packet from {} for {} perms={}", player.getName().getString(), packet.getUUID(),
+				ServerMVMisc.hasPermissionLevel(player, 2));
 		if (!ServerMVMisc.hasPermissionLevel(player, 2))
 			return;
 		
@@ -208,6 +215,8 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 			return;
 		
 		Entity entity = world.getEntity(packet.getUUID());
+		LOGGER.info("[set-entity] world={} entity={} recreate={} nbt={}", world.dimension().identifier(),
+				entity == null ? "NULL" : EntityType.getKey(entity.getType()).toString(), packet.isRecreate(), packet.getNbt());
 		if (entity == null)
 			return;
 		
@@ -246,7 +255,12 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 			if (vehicle != null)
 				entity.startRiding(vehicle, true,true);
 		} else {
-			entity.getEntityData().assignValues(Objects.requireNonNull(new SynchedEntityData.Builder(entity).build().getNonDefaultValues()));
+			// Minecraft 26.2+ 的 SynchedEntityData.Builder 必须手动 define 每个 accessor 才能 build，
+			// 无法像旧版本那样直接从实体重建默认值；跳过重置（Entity.load 会整体套用 NBT）
+			try {
+				entity.getEntityData().assignValues(Objects.requireNonNull(new SynchedEntityData.Builder(entity).build().getNonDefaultValues()));
+			} catch (IllegalStateException ignored) {
+			}
 			readEntityNbtWithPassengers(world, entity, packet.getNbt());
 		}
 	}

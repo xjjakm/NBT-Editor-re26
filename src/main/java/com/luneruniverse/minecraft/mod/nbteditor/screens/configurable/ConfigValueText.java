@@ -43,11 +43,11 @@ public class ConfigValueText extends NamedTextFieldWidget implements ConfigValue
 	
 	@Override
 	public void setValue(String value) {
-		setValue(value);
+		super.setValue(value);
 	}
 	@Override
 	public String getConfigValue() {
-		return getConfigValue();
+		return getValue();
 	}
 	@Override
 	public boolean isValueValid() {

@@ -43,6 +43,9 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 	protected NamedTextFieldWidget name;
 	private Button saveBtn;
 	
+	// 若设置了保存后返回的屏幕，保存按钮变为「保存并返回」
+	private Screen saveReturnTarget;
+	
 	protected LocalEditorScreen(Component title, NBTReference<L> ref) {
 		super(title);
 		this.ref = ref;
@@ -51,6 +54,26 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		this.saved = true;
 	}
 	
+	protected Component getSaveBtnText() {
+		return TextInst.translatable("nbteditor.editor.save");
+	}
+	protected Component getSaveAndReturnBtnText() {
+		return TextInst.translatable("nbteditor.save_and_return");
+	}
+	// 设置保存后要返回的屏幕（非 null 时保存按钮变为「保存并返回」）
+	public void setSaveReturnTarget(Screen target) {
+		this.saveReturnTarget = target;
+		// 若按钮已创建（屏幕已 init），立即更新文案为「保存并返回」
+		if (saveBtn != null)
+			saveBtn.setMessage(getCurrentSaveBtnText());
+	}
+	private Component getCurrentSaveBtnText() {
+		return saveReturnTarget == null ? getSaveBtnText() : getSaveAndReturnBtnText();
+	}
+	protected void onSaved() {
+		if (saveReturnTarget != null)
+			minecraft.gui.setScreen(saveReturnTarget);
+	}
 	protected boolean isNameEditable() {
 		return false;
 	}
@@ -83,7 +106,10 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		addRenderableWidget(name);
 		
 		if (isSaveRequried()) {
-			saveBtn = addRenderableWidget(MVMisc.newButton(16 + (32 + 8) * 2 + 100 + 8, 16 + 6, 100, 20, TextInst.translatable("nbteditor.editor.save"), _ -> save()));
+			saveBtn = addRenderableWidget(MVMisc.newButton(16 + (32 + 8) * 2 + 100 + 8, 16 + 6, 100, 20, getCurrentSaveBtnText(), _ -> {
+				if (save())
+					onSaved();
+			}));
 			saveBtn.active = !saved;
 		}
 		
@@ -177,13 +203,13 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 			savedLocalNBT = LocalNBT.copy(localNBT);
 			saveBtn.setMessage(TextInst.translatable("nbteditor.editor.saving"));
 			setSaved(true);
-			ref.saveLocalNBT(savedLocalNBT, () -> saveBtn.setMessage(TextInst.translatable("nbteditor.editor.save")));
+			ref.saveLocalNBT(savedLocalNBT, () -> saveBtn.setMessage(getCurrentSaveBtnText()));
 		} else {
 			localNBT.toItem(false).ifPresentOrElse(item -> {
 				savedLocalNBT = LocalNBT.copy(localNBT);
 				GetLostItemCommand.loseItem(item);
 				setSaved(true);
-				saveBtn.setMessage(TextInst.translatable("nbteditor.editor.save"));
+				saveBtn.setMessage(getCurrentSaveBtnText());
 			}, () -> setOverlay(new AlertWidget(() -> setOverlay(null), TextInst.translatable("nbteditor.editor.ref_broken")), 500));
 		}
 		return true;

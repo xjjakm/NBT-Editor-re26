@@ -11,6 +11,7 @@
 	
 	"nbteditor.ok": "Ok",
 	"nbteditor.cancel": "Cancel",
+	"nbteditor.clear": "Clear",
 	"nbteditor.loading": "Loading ...",
 	"nbteditor.hide": "Run In Background",
 	
@@ -684,5 +685,28 @@
 	"nbteditor.hdb.category.monsters": "monsters",
 	"nbteditor.hdb.category.plants": "plants",
 
-	"modmenu.descriptionTranslation.nbteditor": "Lets you edit items, blocks, and entities ingame, store items in a client side chest, open containers in your inventory, and more!"
+        "nbteditor.villager": "Villager Editor",
+        "nbteditor.villager.data": "Villager Data",
+        "nbteditor.villager.profession": "Profession",
+        "nbteditor.villager.type": "Type",
+        "nbteditor.villager.level": "Level",
+        "nbteditor.villager.xp": "Villager XP",
+        "nbteditor.villager.offers": "Trades",
+        "nbteditor.villager.offer": "Trade",
+        "nbteditor.villager.buy": "Buy A",
+        "nbteditor.villager.buy_b": "Buy B (Optional)",
+        "nbteditor.villager.sell": "Sell",
+        "nbteditor.villager.count": "Count",
+        "nbteditor.villager.max_uses": "Max Uses",
+        "nbteditor.villager.offer_xp": "Trade XP",
+        "nbteditor.villager.nbt": "NBT",
+        "nbteditor.villager.choose_item": "Choose Item...",
+        "nbteditor.villager.select_item_first": "Select an item first",
+
+        "nbteditor.select_item": "Select Item",
+        "nbteditor.item_search": "Search name or ID...",
+        "nbteditor.confirm": "Confirm",
+        "nbteditor.save_and_return": "Save and Return",
+
+        "modmenu.descriptionTranslation.nbteditor": "Lets you edit items, blocks, and entities ingame, store items in a client side chest, open containers in your inventory, and more!"
 }

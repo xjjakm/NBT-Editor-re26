@@ -11,6 +11,7 @@
 	
 	"nbteditor.ok": "確定",
 	"nbteditor.cancel": "取消",
+	"nbteditor.clear": "清空",
 	"nbteditor.loading": "讀取中 ...",
 	"nbteditor.hide": "在背景執行",
 	
@@ -614,5 +615,28 @@
 	"nbteditor.hdb.category.humanoid": "類人生物",
 	"nbteditor.hdb.category.miscellaneous": "其他",
 	"nbteditor.hdb.category.monsters": "怪物",
-	"nbteditor.hdb.category.plants": "植物"
-}
+		"nbteditor.hdb.category.plants": "植物",
+
+        "nbteditor.villager": "村民",
+        "nbteditor.villager.data": "村民資料",
+        "nbteditor.villager.profession": "職業",
+        "nbteditor.villager.type": "類型",
+        "nbteditor.villager.level": "等級",
+        "nbteditor.villager.xp": "經驗",
+        "nbteditor.villager.offers": "交易",
+        "nbteditor.villager.offer": "交易",
+        "nbteditor.villager.buy": "收購A",
+        "nbteditor.villager.buy_b": "收購B（可選）",
+        "nbteditor.villager.sell": "出售",
+        "nbteditor.villager.count": "數量",
+        "nbteditor.villager.max_uses": "最大次數",
+        "nbteditor.villager.offer_xp": "交易經驗",
+        "nbteditor.villager.nbt": "NBT",
+        "nbteditor.villager.choose_item": "選擇物品...",
+        "nbteditor.villager.select_item_first": "請先選擇物品",
+
+        "nbteditor.select_item": "選擇物品",
+        "nbteditor.item_search": "搜尋名稱或ID...",
+        "nbteditor.confirm": "確定",
+        "nbteditor.save_and_return": "儲存並返回"
+	}

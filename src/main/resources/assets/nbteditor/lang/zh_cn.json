@@ -11,6 +11,7 @@
 	
 	"nbteditor.ok": "确定",
 	"nbteditor.cancel": "取消",
+	"nbteditor.clear": "清空",
 	"nbteditor.loading": "加载中 ...",
 	"nbteditor.hide": "在后台运行",
 	
@@ -691,5 +692,28 @@
 	"nbteditor.hdb.category.monsters": "怪物",
 	"nbteditor.hdb.category.plants": "植物",
 
-	"modmenu.descriptionTranslation.nbteditor": "让你在游戏中编辑物品、方块和实体，将物品存储在客户端箱子中，在你的背包中打开容器，等等！"
+        "nbteditor.villager": "村民编辑器",
+        "nbteditor.villager.data": "村民数据",
+        "nbteditor.villager.profession": "职业",
+        "nbteditor.villager.type": "类型",
+        "nbteditor.villager.level": "等级",
+        "nbteditor.villager.xp": "经验值",
+        "nbteditor.villager.offers": "交易列表",
+        "nbteditor.villager.offer": "交易",
+        "nbteditor.villager.buy": "收购A",
+        "nbteditor.villager.buy_b": "收购B（可选）",
+        "nbteditor.villager.sell": "出售",
+        "nbteditor.villager.count": "数量",
+        "nbteditor.villager.max_uses": "最大次数",
+        "nbteditor.villager.offer_xp": "交易经验",
+        "nbteditor.villager.nbt": "NBT",
+        "nbteditor.villager.choose_item": "选择物品...",
+        "nbteditor.villager.select_item_first": "请先选择物品",
+
+        "nbteditor.select_item": "选择物品",
+        "nbteditor.item_search": "搜索名称或ID...",
+        "nbteditor.confirm": "确定",
+        "nbteditor.save_and_return": "保存并返回",
+
+        "modmenu.descriptionTranslation.nbteditor": "让你在游戏中编辑物品、方块和实体，将物品存储在客户端箱子中，在你的背包中打开容器，等等！"
 }

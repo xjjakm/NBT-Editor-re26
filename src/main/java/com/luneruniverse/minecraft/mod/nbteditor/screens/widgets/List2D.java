@@ -38,6 +38,13 @@ public class List2D extends Panel<List2D.List2DValue> {
 	private int itemHeight;
 	private int itemPadding;
 	
+	public int getItemWidth() {
+		return itemWidth;
+	}
+	public int getItemHeight() {
+		return itemHeight;
+	}
+	
 	private final List<PositionedPanelElement<List2DValue>> elements;
 	private GuiEventListener finalEventHandler;
 	

@@ -7,6 +7,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.SignboardCom
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.EntityReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
@@ -19,6 +20,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
@@ -56,10 +58,18 @@ public class LocalFactoryScreen<L extends LocalNBT> extends LocalEditorScreen<L>
 		addFactory("nbteditor.enchantments", EnchantmentsScreen::new, ItemReference.class);
 		addFactory("nbteditor.attributes", AttributesCommand.ATTRIBUTES_FILTER, AttributesScreen::new);
 		addFactory("nbteditor.block_states", BlockStatesCommand.BLOCK_FILTER, BlockStatesScreen::new);
+		addFactory("nbteditor.villager", ref -> ref instanceof EntityReference && ((EntityReference) ref).getEntityType() == EntityTypes.VILLAGER,
+				VillagerScreen::new, EntityReference.class);
 	}
 	
 	private final ConfigCategory config;
 	private ConfigPanel panel;
+	
+	// 从该面板进入的子编辑器中「保存后要返回的屏幕」（非 null 时子编辑器保存按钮变为「保存并返回」）
+	private Screen returnScreen;
+	public void setReturnScreen(Screen returnScreen) {
+		this.returnScreen = returnScreen;
+	}
 	
 	public LocalFactoryScreen(NBTReference<L> ref) {
 		super(TextInst.of("Factories"), ref);
@@ -67,8 +77,17 @@ public class LocalFactoryScreen<L extends LocalNBT> extends LocalEditorScreen<L>
 		for (LocalFactoryReference factory : BASIC_FACTORIES) {
 			if (factory.supported().test(ref)) {
 				this.config.setConfigurable(factory.buttonText().getString(), new ConfigButton(150, factory.buttonText(),
-						_ -> factory.factory().accept(ref)));
+						_ -> openFactory(factory.factory(), ref)));
 			}
+		}
+	}
+	
+	private void openFactory(Consumer<NBTReference<?>> factory, NBTReference<?> ref) {
+		factory.accept(ref);
+		if (returnScreen != null) {
+			Screen current = MainUtil.client.gui.screen();
+			if (current instanceof LocalEditorScreen<?> localScreen)
+				localScreen.setSaveReturnTarget(returnScreen);
 		}
 	}
 	
