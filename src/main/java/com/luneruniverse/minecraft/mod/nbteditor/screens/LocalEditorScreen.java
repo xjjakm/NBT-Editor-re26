@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.*;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
@@ -55,7 +56,9 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 	}
 	
 	protected Component getSaveBtnText() {
-		return TextInst.translatable("nbteditor.editor.save");
+		if (localNBT instanceof LocalItem)
+			return TextInst.translatable("nbteditor.editor.save");
+		return TextInst.translatable("nbteditor.editor.save_changes");
 	}
 	protected Component getSaveAndReturnBtnText() {
 		return TextInst.translatable("nbteditor.save_and_return");
@@ -203,16 +206,24 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 			savedLocalNBT = LocalNBT.copy(localNBT);
 			saveBtn.setMessage(TextInst.translatable("nbteditor.editor.saving"));
 			setSaved(true);
-			ref.saveLocalNBT(savedLocalNBT, () -> saveBtn.setMessage(getCurrentSaveBtnText()));
+			ref.saveLocalNBT(savedLocalNBT, () -> {
+				saveBtn.setMessage(getCurrentSaveBtnText());
+				onAfterSave();
+			});
 		} else {
 			localNBT.toItem(false).ifPresentOrElse(item -> {
 				savedLocalNBT = LocalNBT.copy(localNBT);
 				GetLostItemCommand.loseItem(item);
 				setSaved(true);
 				saveBtn.setMessage(getCurrentSaveBtnText());
+				onAfterSave();
 			}, () -> setOverlay(new AlertWidget(() -> setOverlay(null), TextInst.translatable("nbteditor.editor.ref_broken")), 500));
 		}
 		return true;
+	}
+	
+	/** 保存成功后调,子类可 override 重建依赖当前物品状态的控件(ConfigPanel 等) */
+	protected void onAfterSave() {
 	}
 	protected void checkSave() {
 		localNBT.getOrCreateNBT(); // Make sure both items have NBT defined, so no NBT and empty NBT comes out equal

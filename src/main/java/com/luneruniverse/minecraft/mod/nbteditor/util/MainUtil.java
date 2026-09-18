@@ -308,7 +308,11 @@ public class MainUtil {
 	
 	public static ItemStack copyAirable(ItemStack item) {
 		if (NBTManagers.COMPONENTS_EXIST) {
-			ItemStack output = item.transmuteCopy(item.getItem(), item.getCount());
+			// 2026-09-18: 直接用原版 item.copy() 深拷贝组件 patch。
+			// Fabric 的 transmuteCopy 在某些版本下只复制 Item+Count，组件内部的 Tag/Map 是共享引用，
+			// 导致 LocalEditorScreen.checkSave 里 savedLocalNBT 和 localNBT 比较永远相等
+			// （修改 local 的同时 saved 也被同步改了），保存按钮永远灰色。
+			ItemStack output = item.copy();
 			output.setPopTime(item.getPopTime());
 			return output;
 		}

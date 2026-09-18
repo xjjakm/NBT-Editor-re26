@@ -1,21 +1,20 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.StreamSupport;
-
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
-
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import org.joml.Matrix3x2fStack;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.StreamSupport;
 
 public abstract class Panel<T extends Renderable & GuiEventListener> implements MVDrawable, MVElement, NarratableEntry {
 	
@@ -97,7 +96,8 @@ public abstract class Panel<T extends Renderable & GuiEventListener> implements 
 		return output;
 	}
 	protected boolean continueEvents() {
-		return true;
+		return false; // First widget that handles the event wins — prevents ALL EditBoxes
+		// from calling setFocused(true) when clicking one of them.
 	}
 	protected void updateMousePos(double mouseX, double mouseY) {}
 	

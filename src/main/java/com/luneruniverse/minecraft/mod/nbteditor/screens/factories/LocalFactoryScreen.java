@@ -22,6 +22,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SpawnEggItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +63,9 @@ public class LocalFactoryScreen<L extends LocalNBT> extends LocalEditorScreen<L>
 				VillagerScreen::new, EntityReference.class);
 		addFactory("nbteditor.entity_attributes", ref -> ref instanceof EntityReference,
 				EntityAttributesScreen::new, EntityReference.class);
+		addFactory("nbteditor.spawn_egg_attributes",
+				ref -> ((ItemReference) ref).getItem().getItem() instanceof SpawnEggItem,
+				SpawnEggAttributesScreen::new, ItemReference.class);
 	}
 	
 	private final ConfigCategory config;

@@ -1,23 +1,30 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
-import java.util.List;
-
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.Panel;
-
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import org.joml.Matrix3x2fStack;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ConfigPanel extends Panel<ConfigPath> implements Tickable {
 	
-	private final ConfigPath toRender;
+	private ConfigPath toRender;
 	private final List<PositionedPanelElement<ConfigPath>> elements;
 	
 	public ConfigPanel(int x, int y, int width, int height, ConfigPath toRender) {
 		super(x, y, width, height, 1, true);
 		this.toRender = toRender;
-		this.elements = List.of(new PositionedPanelElement<>(toRender, 0, 0));
+		this.elements = new ArrayList<>();
+		this.elements.add(new PositionedPanelElement<>(toRender, 0, 0));
+	}
+	
+	public void setConfig(ConfigPath newConfig) {
+		this.toRender = newConfig;
+		this.elements.clear();
+		this.elements.add(new PositionedPanelElement<>(newConfig, 0, 0));
 	}
 	
 	public void setScroll(int scroll) {
