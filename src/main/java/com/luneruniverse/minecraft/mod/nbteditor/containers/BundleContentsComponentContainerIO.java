@@ -1,12 +1,12 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
-import java.util.Arrays;
-
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.BundleContents;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.resources.Identifier;
+
+import java.util.Arrays;
 
 public class BundleContentsComponentContainerIO implements ContainerIO<ItemStack> {
 	
@@ -39,7 +39,7 @@ public class BundleContentsComponentContainerIO implements ContainerIO<ItemStack
 		BundleContents component = container.get(DataComponents.BUNDLE_CONTENTS);
 		if (component == null)
 			return new ItemStack[0];
-		return component.itemCopyStream().toArray(ItemStack[]::new);
+		return component.itemCopies().toArray(ItemStack[]::new);
 	}
 	
 	@Override

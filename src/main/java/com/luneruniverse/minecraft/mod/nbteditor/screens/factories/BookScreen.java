@@ -9,13 +9,13 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.*;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.WrittenBookTagReferences;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.inventory.BookViewScreen.BookAccess;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -196,7 +196,7 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 							new net.minecraft.client.gui.screens.inventory.BookViewScreen(getPreviewItem()) {
 						@Override
 						public boolean keyPressed(KeyEvent keyInput) {
-							if (keyInput.key() == GLFW.GLFW_KEY_ESCAPE) {
+							if (keyInput.key() == InputConstants.KEY_ESCAPE) {
 								setOverlay(null);
 								return true;
 							}
@@ -250,8 +250,8 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 		if (super.keyPressed(keyInput))
 			return true;
 		
-		if (keyCode == GLFW.GLFW_KEY_PAGE_UP || keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
-			boolean prev = (keyCode == GLFW.GLFW_KEY_PAGE_DOWN);
+		if (keyCode == InputConstants.KEY_PAGEUP || keyCode == InputConstants.KEY_PAGEDOWN) {
+			boolean prev = (keyCode == InputConstants.KEY_PAGEDOWN);
 			if (ConfigScreen.isInvertedPageKeybinds())
 				prev = !prev;
 			if (prev)

@@ -3,11 +3,9 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.EditBoxMixin;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-
-import net.minecraft.client.Minecraft;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
-import com.mojang.blaze3d.vertex.PoseStack;
 import org.joml.Matrix3x2fStack;
 
 public class MVTextFieldWidget extends EditBox implements Tickable, MVElement {
@@ -29,10 +27,7 @@ public class MVTextFieldWidget extends EditBox implements Tickable, MVElement {
 	
 	public MVTextFieldWidget tooltip(MVTooltip tooltip) {
 		this.tooltip = tooltip;
-		Version.newSwitch()
-				.range("1.19.3", null, () -> setTooltip(tooltip == null ? null : tooltip.toNewTooltip()))
-				.range(null, "1.19.2", () -> {})
-				.run();
+		setTooltip(tooltip == null ? null : tooltip.toNewTooltip());
 		return this;
 	}
 	

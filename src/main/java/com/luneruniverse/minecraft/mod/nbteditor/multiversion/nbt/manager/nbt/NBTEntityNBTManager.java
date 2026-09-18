@@ -38,7 +38,7 @@ public class NBTEntityNBTManager implements NBTManager<Entity> {
 	}
 	@Override
 	public void setNbt(Entity subject, CompoundTag nbt) {
-		subject.load(TagValueInput.create(ProblemReporter.DISCARDING, (MainUtil.client.getConnection() == null ? VanillaRegistries.createLookup() : MainUtil.client.getConnection().registryAccess()),nbt));
+		subject.load(TagValueInput.create(ProblemReporter.DISCARDING, (MainUtil.client.getConnection() == null ? VanillaRegistries.createWorldLookup() : MainUtil.client.getConnection().registryAccess()),nbt));
 	}
 	
 }

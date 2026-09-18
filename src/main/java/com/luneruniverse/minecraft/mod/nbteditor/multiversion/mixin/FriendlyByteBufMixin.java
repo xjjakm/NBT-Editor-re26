@@ -108,7 +108,7 @@ public abstract class FriendlyByteBufMixin implements MVPacketByteBufParent {
 	private Object createRegistryByteBuf() {
 		return Reflection.newInstance("net.minecraft.class_9129",
 				new Class<?>[] {ByteBuf.class, RegistryAccess.class},
-                source, (MainUtil.client.getConnection() == null ? VanillaRegistries.createLookup() : MainUtil.client.getConnection().registryAccess()));
+                source, (MainUtil.client.getConnection() == null ? VanillaRegistries.createWorldLookup() : MainUtil.client.getConnection().registryAccess()));
 	}
 	
 }

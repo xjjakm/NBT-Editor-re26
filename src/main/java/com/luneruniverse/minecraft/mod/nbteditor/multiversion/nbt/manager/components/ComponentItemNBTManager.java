@@ -10,15 +10,12 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class ComponentItemNBTManager implements DeserializableNBTManager<ItemStack> {
 	
@@ -26,7 +23,7 @@ public class ComponentItemNBTManager implements DeserializableNBTManager<ItemSta
 		try {
 			return DynamicRegistryManagerHolder.getManager();
 		} catch (RuntimeException e) {
-			return VanillaRegistries.createLookup();
+			return VanillaRegistries.createWorldLookup();
 		}
 	}
 	
@@ -78,17 +75,14 @@ public class ComponentItemNBTManager implements DeserializableNBTManager<ItemSta
 	public void setNbt(ItemStack subject, CompoundTag nbt) {
 		DataComponentPatch components = DataComponentPatch.CODEC.decode(
 				getLookup().createSerializationContext(NbtOps.INSTANCE), nbt.copy()).getPartialOrThrow().getFirst();
-		Map<DataComponentType<?>, Optional<?>> componentMap = components.entrySet().stream()
-				.collect(Collectors.toMap(
-						Map.Entry::getKey,
-						Map.Entry::getValue
-				));
-		Optional<? extends Integer> maxDamage = (Optional<? extends Integer>) componentMap.get(DataComponents.MAX_DAMAGE);
-		Optional<? extends Integer> maxStackSize = (Optional<? extends Integer>) componentMap.get(DataComponents.MAX_STACK_SIZE);
-		if (maxDamage != null && maxDamage.isPresent() &&
-				(maxStackSize.isEmpty() ?
+		DataComponentPatch.SplitResult split = components.split();
+		Integer maxDamage = split.added().get(DataComponents.MAX_DAMAGE);
+		Integer maxStackSize = split.added().get(DataComponents.MAX_STACK_SIZE);
+		boolean stackSizeMissing = !split.removed().contains(DataComponents.MAX_STACK_SIZE) && maxStackSize == null;
+		if (maxDamage != null &&
+				(stackSizeMissing ?
 						subject.getPrototype().get(DataComponents.MAX_STACK_SIZE) > 1 :
-						maxStackSize.isPresent() && maxStackSize.get() > 1)) {
+						maxStackSize != null && maxStackSize > 1)) {
 			components = components.forget(component -> component == DataComponents.MAX_DAMAGE);
 		}
 		MixinLink.setChanges(subject, components);
@@ -97,21 +91,21 @@ public class ComponentItemNBTManager implements DeserializableNBTManager<ItemSta
 	@Override
 	public String getNbtString(ItemStack subject) {
 		DataComponentPatch components = subject.getComponentsPatch();
+		DataComponentPatch.SplitResult split = components.split();
 		StringBuilder builder = new StringBuilder("[");
 		boolean first = true;
-		for (Map.Entry<DataComponentType<?>, Optional<?>> entry : components.entrySet()) {
-			if (first)
-				first = false;
-			else
-				builder.append(",");
-			entry.getValue().ifPresentOrElse(value -> {
-				builder.append(entry.getKey());
-				builder.append("=");
-				builder.append(encodeComponent(entry.getKey(), value).getPartialOrThrow());
-			}, () -> {
-				builder.append("!");
-				builder.append(entry.getKey());
-			});
+		for (TypedDataComponent<?> typed : split.added()) {
+			if (!first) builder.append(",");
+			first = false;
+			builder.append(typed.type());
+			builder.append("=");
+			builder.append(encodeComponent(typed.type(), typed.value()).getPartialOrThrow());
+		}
+		for (DataComponentType<?> removed : split.removed()) {
+			if (!first) builder.append(",");
+			first = false;
+			builder.append("!");
+			builder.append(removed);
 		}
 		builder.append(']');
 		return builder.toString();

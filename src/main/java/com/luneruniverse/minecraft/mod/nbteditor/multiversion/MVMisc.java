@@ -524,11 +524,12 @@ public class MVMisc {
 
 	@SuppressWarnings("DataFlowIssue")
 	public static CommandSourceStack getCommandSource(Entity entity) {
-		return Version.<CommandSourceStack>newSwitch()
-				.range("1.21.2", null, () -> new CommandSourceStack(
-						CommandSource.NULL, entity.position(), entity.getRotationVector(), null, PermissionSet.ALL_PERMISSIONS,
-						entity.getName().getString(), entity.getDisplayName(), null, entity))
-				.get();
+		net.minecraft.server.level.ServerLevel serverLevel =
+				net.minecraft.server.level.ServerLevel.class.cast(entity.level());
+		return new CommandSourceStack(
+				CommandSource.NULL, entity.position(),
+				new net.minecraft.world.phys.Vec2(entity.getYRot(), entity.getXRot()),
+				serverLevel, PermissionSet.ALL_PERMISSIONS, serverLevel.getServer(), entity);
 	}
 
 	public static ProfilerFiller getProfiler() {
@@ -546,7 +547,7 @@ public class MVMisc {
 	// Edited to remove x, y, & z
 	@SuppressWarnings("deprecation")
 	public static void addBlockEntityNbtWithoutXYZ(ItemStack item, BlockEntity entity) {
-		CompoundTag blockEntityTag = entity.saveCustomOnly((MainUtil.client.getConnection() == null ? VanillaRegistries.createLookup() : MainUtil.client.getConnection().registryAccess()));
+		CompoundTag blockEntityTag = entity.saveCustomOnly((MainUtil.client.getConnection() == null ? VanillaRegistries.createWorldLookup() : MainUtil.client.getConnection().registryAccess()));
 		blockEntityTag.remove("x");
 		blockEntityTag.remove("y");
 		blockEntityTag.remove("z");
@@ -612,7 +613,7 @@ public class MVMisc {
 	}
 
 	public static boolean isSignItem(Item item) {
-		if (item instanceof SignItem)
+		if (item instanceof net.minecraft.world.item.BlockItem)
 			return true;
 		return Version.<Boolean>newSwitch()
 				.range("1.20.0", null, () -> false)

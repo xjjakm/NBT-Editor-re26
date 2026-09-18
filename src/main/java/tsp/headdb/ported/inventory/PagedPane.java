@@ -6,6 +6,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.InputOverlay;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.StringInput;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.Container;
@@ -13,7 +14,6 @@ import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.lwjgl.glfw.GLFW;
 import tsp.headdb.ported.HeadAPI;
 import tsp.headdb.ported.Utils;
 
@@ -138,13 +138,13 @@ public class PagedPane extends ClientHandledScreen {
     private boolean shiftKey;
     @Override
     public boolean keyPressed(KeyEvent keyInput) {
-    	if (keyInput.key() == GLFW.GLFW_KEY_LEFT_SHIFT || keyInput.key()  == GLFW.GLFW_KEY_RIGHT_SHIFT)
+    	if (keyInput.key() == InputConstants.KEY_LSHIFT || keyInput.key()  == InputConstants.KEY_RSHIFT)
     		shiftKey = true;
     	return super.keyPressed(keyInput);
     }
     @Override
     public boolean keyReleased(KeyEvent keyInput) {
-    	if (keyInput.key()  == GLFW.GLFW_KEY_LEFT_SHIFT || keyInput.key()  == GLFW.GLFW_KEY_RIGHT_SHIFT)
+    	if (keyInput.key()  == InputConstants.KEY_LSHIFT || keyInput.key()  == InputConstants.KEY_RSHIFT)
     		shiftKey = false;
     	return super.keyReleased(keyInput);
     }

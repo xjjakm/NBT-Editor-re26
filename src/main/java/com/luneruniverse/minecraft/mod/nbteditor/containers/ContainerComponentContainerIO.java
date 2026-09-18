@@ -1,11 +1,11 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
-import java.util.Arrays;
-
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.component.ItemContainerContents;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
+
+import java.util.Arrays;
 
 public class ContainerComponentContainerIO implements ContainerIO<ItemStack> {
 	
@@ -20,7 +20,7 @@ public class ContainerComponentContainerIO implements ContainerIO<ItemStack> {
 	@Override
 	public boolean isSupported(ItemStack container) {
 		ItemContainerContents component = container.get(DataComponents.CONTAINER);
-		return component == null || component.allItemsCopyStream().count() <= numSlots;
+		return component == null || component.nonEmptyItemCopyStream().count() <= numSlots;
 	}
 	
 	@Override
@@ -35,7 +35,7 @@ public class ContainerComponentContainerIO implements ContainerIO<ItemStack> {
 	
 	@Override
 	public ItemStack[] read(ItemStack container) {
-		return container.get(DataComponents.CONTAINER).allItemsCopyStream().toArray(ItemStack[]::new);
+		return container.get(DataComponents.CONTAINER).nonEmptyItemCopyStream().toArray(ItemStack[]::new);
 	}
 	
 	@Override

@@ -1,6 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion.shaders;
 
-import com.mojang.blaze3d.PrimitiveTopology;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 
 public enum MVDrawMode {
 	LINES,

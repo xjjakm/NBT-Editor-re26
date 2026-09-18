@@ -1,83 +1,33 @@
 package com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled;
 
-import java.util.List;
-
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BasicMixinPlugin;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 
+import java.util.List;
+
 public class NBTEditorMixinPlugin extends BasicMixinPlugin {
-	
+
 	@Override
 	public void addMixins(List<String> output) {
-		Version.newSwitch()
-				.range("1.19.3", null, () -> output.add("toggled.ServerGamePacketListenerImplMixin"))
-				.range(null, "1.19.2", () -> {})
-				.run();
-		Version.newSwitch()
-				.range("1.21.0", null, () -> output.add("toggled.ArmorSlotMixin"))
-				.run();
-		Version.newSwitch()
-				.range("1.21.5", null, () -> {}) // Covered by ArmorSlotMixin
-				.range(null, "1.21.4", () -> {
-					output.add("toggled.HorseScreenHandler1Mixin");
-					output.add("toggled.HorseScreenHandler2Mixin");
-				})
-				.run();
-		
+		// 26.3+ 全保留
+		output.add("toggled.ServerGamePacketListenerImplMixin");
+		output.add("toggled.ArmorSlotMixin");
+
 		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER)
 			return;
-		
-		Version.newSwitch()
-				.range("1.20.0", null, () -> {
-					output.add("toggled.GuiGraphicsExtractorMixin");
-					output.add("toggled.GuiRenderStateMixin");
-				})
-				.range("1.19.3", "1.19.4", () -> output.add("toggled.ScreenMixin"))
-				.range(null, "1.19.2", () -> {})
-				.run();
-		Version.newSwitch()
-				.range("1.20.5", null, () -> output.add("toggled.ItemStackMixin"))
-				.range(null, "1.20.4", () -> {})
-				.run();
-		Version.newSwitch()
-				.range("1.20.5", null, () -> {
-					output.add("toggled.RegistryEntryReferenceMixin");
-					output.add("toggled.Registry1Mixin");
-				})
-				.range(null, "1.20.4", () -> {})
-				.run();
-		Version.newSwitch()
-				.range("1.21.0", null, () -> output.add("toggled.TooltipMixin"))
-				.range(null, "1.20.6", () -> {})
-				.run();
-		Version.newSwitch()
-				.range("1.21.0", null, () -> output.add("toggled.EnchantmentMixin"))
-				.range(null, "1.20.6", () -> {})
-				.run();
-		Version.newSwitch()
-				.range("1.21.5", null, () -> output.add("toggled.GameRendererMixin_1_21_5"))
-				.run();
-		Version.newSwitch()
-				.range("1.21.4", null, () -> {
-					output.add("toggled.ItemModelResolverMixin");
-					output.add("toggled.ItemRenderStateLayerRenderStateMixin");
-				})
-				.range(null, "1.21.3", () -> output.add("toggled.BuiltinModelItemRendererMixin"))
-				.run();
-		Version.newSwitch()
-				.range("1.21.2", null, () -> output.add("toggled.ClientPacketListenerMixin"))
-				.range(null, "1.21.1", () -> {})
-				.run();
-		Version.newSwitch()
-				.range("1.21.5", null, () -> output.add("toggled.SnbtGrammarMixin"))
-				.range(null, "1.21.4", () -> output.add("toggled.TagParserMixin"))
-				.run();
-		Version.newSwitch()
-				.range("26.0", null, () -> output.add("toggled.ChestSpecialRendererMixin"))
-				.run();
+
+		output.add("toggled.GuiGraphicsExtractorMixin");
+		output.add("toggled.GuiRenderStateMixin");
+		output.add("toggled.ItemStackMixin");
+		output.add("toggled.RegistryEntryReferenceMixin");
+		output.add("toggled.Registry1Mixin");
+		output.add("toggled.TooltipMixin");
+		output.add("toggled.EnchantmentMixin");
+		output.add("toggled.ItemModelResolverMixin");
+		output.add("toggled.ItemRenderStateLayerRenderStateMixin");
+		output.add("toggled.ClientPacketListenerMixin");
+		output.add("toggled.SnbtGrammarMixin");
 	}
-	
+
 }

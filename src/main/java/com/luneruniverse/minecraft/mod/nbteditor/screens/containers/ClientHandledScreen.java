@@ -13,6 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryS
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
@@ -23,7 +24,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Function;
 
@@ -49,14 +49,14 @@ public class ClientHandledScreen extends ContainerScreen implements OldEventBeha
 		return false;
 	}
 	public static boolean handleKeybind(int keyCode, ItemStack item, ItemReference ref) {
-		if (keyCode == GLFW.GLFW_KEY_DELETE) {
+		if (keyCode == InputConstants.KEY_DELETE) {
 			if (item == null || item.isEmpty())
 				return false;
 			GetLostItemCommand.addToHistory(item);
 			ref.saveItem(ItemStack.EMPTY);
 			return true;
 		}
-		if (keyCode != GLFW.GLFW_KEY_SPACE)
+		if (keyCode != InputConstants.KEY_SPACE)
 			return false;
 		
 		boolean notAir = item != null && !item.isEmpty();

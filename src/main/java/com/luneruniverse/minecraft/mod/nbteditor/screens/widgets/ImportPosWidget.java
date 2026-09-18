@@ -7,12 +7,12 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlayScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.core.BlockPos;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -85,11 +85,11 @@ public class ImportPosWidget extends GroupWidget implements InitializableOverlay
 	@Override
 	public boolean keyPressed(KeyEvent keyInput) {
 		int keyCode = keyInput.key();
-		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+		if (keyCode == InputConstants.KEY_ESCAPE) {
 			OverlaySupportingScreen.setOverlayStatic(null);
 			return true;
 		}
-		if (keyCode == GLFW.GLFW_KEY_ENTER) {
+		if (keyCode == InputConstants.KEY_RETURN) {
 			done();
 			return true;
 		}

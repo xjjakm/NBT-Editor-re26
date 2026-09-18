@@ -8,13 +8,13 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.InputOverlay;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.StringInput;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -244,7 +244,7 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 			
 			int height = getSpacingHeight();
 			if (mouseX >= -PADDING * 2 && mouseX <= -PADDING && mouseY >= 0 && mouseY <= height) { // Click on the bar
-				if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+				if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
 					if (mouseY <= PADDING) { // Move up
 						if (index > 0) {
 							ConfigListEntry above = parent.getListEntry(index - 1);
@@ -273,7 +273,7 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 						contextMenuY = (int) mouseY;
 						return true;
 					}
-				} else if (click.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+				} else if (click.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
 					contextMenuOpen = true;
 					contextMenuX = (int) mouseX;
 					contextMenuY = (int) mouseY;

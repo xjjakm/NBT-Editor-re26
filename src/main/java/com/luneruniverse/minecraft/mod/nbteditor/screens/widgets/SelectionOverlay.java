@@ -1,16 +1,13 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.*;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlayScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.input.CharacterEvent;
@@ -18,7 +15,12 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class SelectionOverlay<T> extends GroupWidget implements InitializableOverlay<OverlaySupportingScreen> {
 	
@@ -174,7 +176,7 @@ public class SelectionOverlay<T> extends GroupWidget implements InitializableOve
 	
 	@Override
 	public boolean keyPressed(KeyEvent keyInput) {
-		if (keyInput.key() == GLFW.GLFW_KEY_ESCAPE) {
+		if (keyInput.key() == InputConstants.KEY_ESCAPE) {
 			close.run();
 			return true;
 		}

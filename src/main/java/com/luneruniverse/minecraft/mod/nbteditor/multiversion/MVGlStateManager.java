@@ -1,9 +1,10 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
-import java.lang.invoke.MethodType;
-import java.util.function.Supplier;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
+import java.util.function.Supplier;
 
 public class MVGlStateManager {
 	
@@ -72,8 +73,21 @@ public class MVGlStateManager {
 	private static final Supplier<Reflection.FieldReference> GlStateManager$CapabilityTracker_state =
 			Reflection.getOptionalField(GlStateManager$CapabilityTracker, () -> "field_5051", () -> "Z");
 	public static boolean isScissorEnabled() {
-		if (OPEN_GL)
-			return GlStateManager.SCISSOR.mode.enabled;
+		if (OPEN_GL) {
+			try {
+				Field scissorField = GlStateManager.class.getDeclaredField("SCISSOR");
+				scissorField.setAccessible(true);
+				Object scissorState = scissorField.get(null);
+				Field modeField = scissorState.getClass().getDeclaredField("mode");
+				modeField.setAccessible(true);
+				Object booleanState = modeField.get(scissorState);
+				Field enabledField = booleanState.getClass().getDeclaredField("enabled");
+				enabledField.setAccessible(true);
+				return enabledField.getBoolean(booleanState);
+			} catch (Exception e) {
+				return true;
+			}
+		}
 		else
 			return GlStateManager$CapabilityTracker_state.get().get(GlStateManager$ScissorTestState_capState.get().get(GlStateManager_SCISSOR.get().get(null)));
 	}

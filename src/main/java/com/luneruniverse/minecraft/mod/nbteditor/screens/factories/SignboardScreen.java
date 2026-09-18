@@ -1,17 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.*;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
@@ -22,24 +13,26 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFi
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.SignSideTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.StyleUtil;
-
-import net.minecraft.world.level.block.SignBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.CeilingHangingSignBlock;
-import net.minecraft.world.level.block.WallHangingSignBlock;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.world.item.component.TypedEntityData;
-import net.minecraft.world.item.HangingSignItem;
-import net.minecraft.world.item.SignItem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.HangingSignItem;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CeilingHangingSignBlock;
+import net.minecraft.world.level.block.SignBlock;
+import net.minecraft.world.level.block.WallHangingSignBlock;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.joml.Matrix3x2fStack;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import static com.luneruniverse.minecraft.mod.nbteditor.NBTEditor.hasShiftDown;
 
@@ -69,7 +62,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		if (NEW_FEATURES) {
 			Block block = null;
 			if (ref instanceof ItemReference itemRef)
-				block = ((SignItem) itemRef.getItem().getItem()).getBlock();
+				block = ((net.minecraft.world.item.BlockItem) itemRef.getItem().getItem()).getBlock();
 			else if (ref instanceof BlockReference blockRef)
 				block = blockRef.getBlock();
 			woodType = SignBlock.getWoodType(block).name();

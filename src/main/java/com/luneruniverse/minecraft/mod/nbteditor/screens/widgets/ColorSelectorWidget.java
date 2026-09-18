@@ -3,13 +3,13 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.*;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 import java.util.function.Consumer;
@@ -61,14 +61,14 @@ public class ColorSelectorWidget extends GroupWidget {
 		}
 		@Override
 		public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-			if (click.button() != GLFW.GLFW_MOUSE_BUTTON_1 || !isMouseOver(click.x(), click.y()))
+			if (click.button() != InputConstants.MOUSE_BUTTON_LEFT || !isMouseOver(click.x(), click.y()))
 				return false;
 			mouseDragged(click, 0, 0);
 			return true;
 		}
 		@Override
 		public boolean mouseDragged(MouseButtonEvent click, double deltaX, double deltaY) {
-			if (click.button() != GLFW.GLFW_MOUSE_BUTTON_1)
+			if (click.button() != InputConstants.MOUSE_BUTTON_LEFT)
 				return false;
 			double mouseX = Mth.clamp(click.x(), x, x + areaSize);
 			double mouseY = Mth.clamp(click.y(), y, y + areaSize);
@@ -108,11 +108,11 @@ public class ColorSelectorWidget extends GroupWidget {
 			}
 			@Override
 			public boolean keyPressed(KeyEvent keyInput) {
-				if (keyInput.key() == GLFW.GLFW_KEY_RIGHT) {
+				if (keyInput.key() == InputConstants.KEY_RIGHT) {
 					setValue(getValue() + 1 / 359.0);
 					return true;
 				}
-				if (keyInput.key() == GLFW.GLFW_KEY_LEFT) {
+				if (keyInput.key() == InputConstants.KEY_LEFT) {
 					setValue(getValue() - 1 / 359.0);
 					return true;
 				}

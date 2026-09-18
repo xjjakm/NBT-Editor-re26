@@ -11,6 +11,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.AlertWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
@@ -19,7 +20,6 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.lang.invoke.MethodType;
 import java.util.function.Function;
@@ -148,10 +148,7 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		x /= scaleX;
 		y /= scaleY;
 		
-		boolean oldMatrix = Version.<Boolean>newSwitch()
-				.range("1.19.4", null, false)
-				.range(null, "1.19.3", true)
-				.get();
+		boolean oldMatrix = false;
 		if (oldMatrix)
 			matrices = RenderSystem_getModelViewStack.get().invoke(null);
 		
@@ -185,7 +182,7 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		if (super.keyPressed(keyInput))
 			return true;
 		
-		if (hasControlDown() && !hasShiftDown() && !hasAltDown() && keyInput.key() == GLFW.GLFW_KEY_S) {
+		if (hasControlDown() && !hasShiftDown() && !hasAltDown() && keyInput.key() == InputConstants.KEY_S) {
 			save();
 			return true;
 		}

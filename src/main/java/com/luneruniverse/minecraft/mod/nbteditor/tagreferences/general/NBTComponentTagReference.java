@@ -40,7 +40,7 @@ public class NBTComponentTagReference<T, C> implements TagReference<T, CompoundT
 	
 	@Override
 	public T get(CompoundTag object) {
-		return codec.decode((MainUtil.client.getConnection() == null ? VanillaRegistries.createLookup() : MainUtil.client.getConnection().registryAccess()).createSerializationContext(NbtOps.INSTANCE), object.get(tag))
+		return codec.decode((MainUtil.client.getConnection() == null ? VanillaRegistries.createWorldLookup() : MainUtil.client.getConnection().registryAccess()).createSerializationContext(NbtOps.INSTANCE), object.get(tag))
 				.result().map(Pair::getFirst).map(getter).orElseGet(defaultValue);
 	}
 	
@@ -51,7 +51,7 @@ public class NBTComponentTagReference<T, C> implements TagReference<T, CompoundT
 			return;
 		}
 		C componentValue = (defaultComponent == null ? null :
-			codec.decode((MainUtil.client.getConnection() == null ? VanillaRegistries.createLookup() : MainUtil.client.getConnection().registryAccess()).createSerializationContext(NbtOps.INSTANCE), object.get(tag))
+			codec.decode((MainUtil.client.getConnection() == null ? VanillaRegistries.createWorldLookup() : MainUtil.client.getConnection().registryAccess()).createSerializationContext(NbtOps.INSTANCE), object.get(tag))
 			.result().map(Pair::getFirst).orElseGet(defaultComponent));
 		componentValue = setter.apply(componentValue, value);
 		if (componentValue == null) {
@@ -59,7 +59,7 @@ public class NBTComponentTagReference<T, C> implements TagReference<T, CompoundT
 			return;
 		}
 		object.put(tag, codec.encodeStart(
-				(MainUtil.client.getConnection() == null ? VanillaRegistries.createLookup() : MainUtil.client.getConnection().registryAccess()).createSerializationContext(NbtOps.INSTANCE), componentValue).getOrThrow());
+				(MainUtil.client.getConnection() == null ? VanillaRegistries.createWorldLookup() : MainUtil.client.getConnection().registryAccess()).createSerializationContext(NbtOps.INSTANCE), componentValue).getOrThrow());
 	}
 	
 }

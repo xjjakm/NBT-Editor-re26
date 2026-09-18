@@ -1,12 +1,12 @@
 package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderOwner;
-import net.minecraft.tags.TagKey;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,7 +14,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
 
 @Mixin(Holder.Reference.class)
 public abstract class RegistryEntryMixin<T> {
@@ -23,8 +24,8 @@ public abstract class RegistryEntryMixin<T> {
 
     @Shadow public abstract Optional<ResourceKey<T>> unwrapKey();
 
-    @Inject(method = "canSerializeIn(Lnet/minecraft/core/HolderOwner;)Z", at = @At("RETURN"), cancellable = true)
-    private void onOwnerEquals(HolderOwner<T> owner, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "canSerializeIn", at = @At("RETURN"), cancellable = true)
+    private void onOwnerEquals(HolderOwner<?> owner, CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(true);
     }
 

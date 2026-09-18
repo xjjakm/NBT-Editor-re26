@@ -1,31 +1,16 @@
 package com.luneruniverse.minecraft.mod.nbteditor;
 
-import net.minecraft.client.Minecraft;
-import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.util.Util;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVNetworking;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.ContainerScreenS2CPacket;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.GetEntityC2SPacket;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.GetLecternBlockC2SPacket;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.ProtocolVersionS2CPacket;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.SetBlockC2SPacket;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.SetEntityC2SPacket;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.SetSlotC2SPacket;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewBlockS2CPacket;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.packets.*;
 import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
-
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.util.Util;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class NBTEditor implements ModInitializer {
 	
@@ -35,18 +20,18 @@ public class NBTEditor implements ModInitializer {
 
 	public static boolean hasControlDown() {
 		if (IS_SYSTEM_MAC) {
-			return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 343) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 347);
+			return InputConstants.isKeyDown(227) || InputConstants.isKeyDown(231);
 		} else {
-			return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 341) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 345);
+			return InputConstants.isKeyDown(224) || InputConstants.isKeyDown(228);
 		}
 	}
 
 	public static boolean hasShiftDown() {
-		return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 340) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 344);
+		return InputConstants.isKeyDown(225) || InputConstants.isKeyDown(229);
 	}
 
 	public static boolean hasAltDown() {
-		return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 342) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), 346);
+		return InputConstants.isKeyDown(226) || InputConstants.isKeyDown(230);
 	}
 	public static boolean isCut(int code) {
 		return code == 88 && hasControlDown() && !hasShiftDown() && !hasAltDown();

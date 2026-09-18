@@ -37,7 +37,7 @@ public record ItemEntityContainerIO(ContainerIO<ItemStack> item, ContainerIO<Loc
 		return new ItemEntityContainerIO(item.withTextures(textures), entity.withTextures(textures));
 	}
 
-	public static final HolderLookup.Provider defaultLookup = VanillaRegistries.createLookup();
+	public static final HolderLookup.Provider defaultLookup = VanillaRegistries.createWorldLookup();
 	public static HolderLookup.Provider lookup() {
 		if(Minecraft.getInstance().getConnection() == null) return defaultLookup;
 		HolderLookup.Provider networkLookup = Minecraft.getInstance().getConnection().registryAccess();

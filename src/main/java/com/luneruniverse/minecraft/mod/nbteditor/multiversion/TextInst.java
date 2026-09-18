@@ -135,7 +135,7 @@ public class TextInst {
 	 * <strong>CONSIDER USING {@link TextUtil#fromJsonSafely(String)}</strong>
 	 */
 	public static String textToJson(Component text) {
-		Tag t = ComponentSerialization.CODEC.encodeStart((MainUtil.client.getConnection() == null ? VanillaRegistries.createLookup() : MainUtil.client.getConnection().registryAccess()).createSerializationContext(NbtOps.INSTANCE),text).result().orElse(new CompoundTag());
+		Tag t = ComponentSerialization.CODEC.encodeStart((MainUtil.client.getConnection() == null ? VanillaRegistries.createWorldLookup() : MainUtil.client.getConnection().registryAccess()).createSerializationContext(NbtOps.INSTANCE),text).result().orElse(new CompoundTag());
 		return t.toString();
 	}
 	public static Component asText(String textString) {
@@ -144,7 +144,7 @@ public class TextInst {
 		try {
 			CompoundTag nbt = TagParser.parseCompoundFully(compoundString);
 			Tag textNbt = nbt.get("a");
-			return ComponentSerialization.CODEC.decode((MainUtil.client.getConnection() == null ? VanillaRegistries.createLookup() : MainUtil.client.getConnection().registryAccess()).createSerializationContext(NbtOps.INSTANCE),textNbt).getOrThrow().getFirst();
+			return ComponentSerialization.CODEC.decode((MainUtil.client.getConnection() == null ? VanillaRegistries.createWorldLookup() : MainUtil.client.getConnection().registryAccess()).createSerializationContext(NbtOps.INSTANCE),textNbt).getOrThrow().getFirst();
 		} catch (Exception e) {}
 		return null;
 	}

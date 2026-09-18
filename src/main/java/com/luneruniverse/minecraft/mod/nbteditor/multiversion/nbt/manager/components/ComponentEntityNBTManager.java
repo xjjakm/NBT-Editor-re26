@@ -26,7 +26,7 @@ public class ComponentEntityNBTManager implements NBTManager<Entity> {
 	private static HolderLookup.Provider getLookup(Entity subject) {
 		if (subject.level() != null)
 			return subject.level().registryAccess();
-		return (MainUtil.client.getConnection() == null ? VanillaRegistries.createLookup() : MainUtil.client.getConnection().registryAccess());
+		return (MainUtil.client.getConnection() == null ? VanillaRegistries.createWorldLookup() : MainUtil.client.getConnection().registryAccess());
 	}
 	
 	@Override

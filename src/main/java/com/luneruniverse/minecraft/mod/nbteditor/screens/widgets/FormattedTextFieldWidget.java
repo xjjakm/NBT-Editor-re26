@@ -8,6 +8,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValu
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.StyleUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
@@ -16,7 +17,6 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.Identifier;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -175,11 +175,11 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			
 			@Override
 			public boolean keyPressed(KeyEvent keyInput) {
-				if (keyInput.key() == GLFW.GLFW_KEY_ESCAPE) {
+				if (keyInput.key() == InputConstants.KEY_ESCAPE) {
 					OverlaySupportingScreen.setOverlayStatic(null);
 					return true;
 				}
-				if (keyInput.key() == GLFW.GLFW_KEY_ENTER) {
+				if (keyInput.key() == InputConstants.KEY_RETURN) {
 					if (ok.active)
 						ok.onPress(keyInput);
 					return true;
@@ -467,12 +467,12 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			
 			if (NBTEditor.hasControlDown() && !NBTEditor.hasShiftDown()) {
 				ChatFormatting formatting = switch (keyInput.key()) {
-					case GLFW.GLFW_KEY_B -> ChatFormatting.BOLD;
-					case GLFW.GLFW_KEY_I -> ChatFormatting.ITALIC;
-					case GLFW.GLFW_KEY_U -> ChatFormatting.UNDERLINE;
-					case GLFW.GLFW_KEY_D -> ChatFormatting.STRIKETHROUGH;
-					case GLFW.GLFW_KEY_K -> ChatFormatting.OBFUSCATED;
-					case GLFW.GLFW_KEY_BACKSLASH -> ChatFormatting.RESET;
+					case InputConstants.KEY_B -> ChatFormatting.BOLD;
+					case InputConstants.KEY_I -> ChatFormatting.ITALIC;
+					case InputConstants.KEY_U -> ChatFormatting.UNDERLINE;
+					case InputConstants.KEY_D -> ChatFormatting.STRIKETHROUGH;
+					case InputConstants.KEY_K -> ChatFormatting.OBFUSCATED;
+					case InputConstants.KEY_BACKSLASH -> ChatFormatting.RESET;
 					default -> null;
 				};
 				if (formatting != null) {
@@ -483,10 +483,10 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			
 			if (NBTEditor.hasControlDown() && NBTEditor.hasShiftDown()) {
 				switch (keyInput.key()) {
-					case GLFW.GLFW_KEY_C -> showCustomColor(hasShadowKeyDown());
-					case GLFW.GLFW_KEY_E -> showEvents();
-					case GLFW.GLFW_KEY_I -> showInsertion();
-					case GLFW.GLFW_KEY_F -> showFont();
+					case InputConstants.KEY_C -> showCustomColor(hasShadowKeyDown());
+					case InputConstants.KEY_E -> showEvents();
+					case InputConstants.KEY_I -> showInsertion();
+					case InputConstants.KEY_F -> showFont();
 				}
 			}
 			

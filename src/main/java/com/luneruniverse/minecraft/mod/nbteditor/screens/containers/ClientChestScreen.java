@@ -16,6 +16,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.LoadingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.input.KeyEvent;
@@ -24,7 +25,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
 
 import static com.luneruniverse.minecraft.mod.nbteditor.NBTEditor.hasShiftDown;
 
@@ -101,7 +101,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 			@Override
 			public boolean keyPressed(KeyEvent keyInput) {
 				int keyCode = keyInput.key();
-				if (keyCode == GLFW.GLFW_KEY_ENTER && !nameField.isValid()) {
+				if (keyCode == InputConstants.KEY_RETURN && !nameField.isValid()) {
 					nameField.setValid(true);
 					ClientChestHelper.setNameOfPage(PAGE, nameField.getValue());
 					return true;
@@ -232,12 +232,12 @@ public class ClientChestScreen extends ClientHandledScreen {
 		int keyCode = keyInput.key();
 		navigationClicked = false;
 		
-		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+		if (keyCode == InputConstants.KEY_ESCAPE) {
 			onClose();
 			return true;
 		}
-		if (keyCode == GLFW.GLFW_KEY_PAGE_UP || keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
-			boolean prev = (keyCode == GLFW.GLFW_KEY_PAGE_DOWN);
+		if (keyCode == InputConstants.KEY_PAGEUP || keyCode == InputConstants.KEY_PAGEDOWN) {
+			boolean prev = (keyCode == InputConstants.KEY_PAGEDOWN);
 			if (ConfigScreen.isInvertedPageKeybinds())
 				prev = !prev;
 			boolean jump = hasShiftDown();
@@ -258,9 +258,9 @@ public class ClientChestScreen extends ClientHandledScreen {
 		if (hoveredSlot != null) {
 			boolean lockedSlot = (hoveredSlot.container == menu.getContainer() &&
 					dynamicItems.isSlotLocked(hoveredSlot.getContainerSlot()));
-			if (!lockedSlot || keyCode == GLFW.GLFW_KEY_DELETE) {
+			if (!lockedSlot || keyCode == InputConstants.KEY_DELETE) {
 				if (handleKeybind(keyCode, hoveredSlot, ClientChestScreen::show, slot -> new ClientChestItemReference(PAGE, slot.getContainerSlot()))) {
-					if (keyCode == GLFW.GLFW_KEY_DELETE && lockedSlot)
+					if (keyCode == InputConstants.KEY_DELETE && lockedSlot)
 						dynamicItems.remove(hoveredSlot.getContainerSlot());
 					return true;
 				}

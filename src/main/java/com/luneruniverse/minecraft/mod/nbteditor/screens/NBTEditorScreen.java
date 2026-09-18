@@ -16,6 +16,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.*;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -27,7 +28,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
 import org.joml.Matrix3x2fStack;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -387,7 +387,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		if (getOverlay() != null)
 			return super.keyPressed(keyInput);
 		
-		if (keyInput.key() == GLFW.GLFW_KEY_ESCAPE) {
+		if (keyInput.key() == InputConstants.KEY_ESCAPE) {
 			onClose();
 			return true;
 		}
@@ -400,22 +400,22 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	}
 	private boolean keyPressed2(KeyEvent keyInput) {
 		int keyCode = keyInput.key();
-		if (keyCode == GLFW.GLFW_KEY_DELETE || keyCode == GLFW.GLFW_KEY_BACKSPACE)
+		if (keyCode == InputConstants.KEY_DELETE || keyCode == InputConstants.KEY_BACKSPACE)
 			remove();
-		else if (keyCode == GLFW.GLFW_KEY_ENTER) {
+		else if (keyCode == InputConstants.KEY_RETURN) {
 			if (!realPath.isEmpty())
 				selectNbt(null, true);
 		}
-		if ((keyInput.modifiers() & GLFW.GLFW_MOD_CONTROL) != 0) {
-			if (keyCode == GLFW.GLFW_KEY_C)
+		if ((keyInput.modifiers() & InputConstants.MOD_CONTROL) != 0) {
+			if (keyCode == InputConstants.KEY_C)
 				copy();
-			else if (keyCode == GLFW.GLFW_KEY_X)
+			else if (keyCode == InputConstants.KEY_X)
 				cut();
-			else if (keyCode == GLFW.GLFW_KEY_V)
+			else if (keyCode == InputConstants.KEY_V)
 				paste();
-			else if (keyCode == GLFW.GLFW_KEY_R)
+			else if (keyCode == InputConstants.KEY_R)
 				rename();
-			else if (keyCode == GLFW.GLFW_KEY_N)
+			else if (keyCode == InputConstants.KEY_N)
 				add();
 		}
 		

@@ -37,7 +37,7 @@ public class ComponentBlockEntityNBTManager implements NBTManager<BlockEntity> {
 	public Attempt<CompoundTag> trySerialize(BlockEntity subject) {
 		// Based on BlockEntity#createNbtWithId
 		
-		HolderLookup.Provider registryLookup = (MainUtil.client.getConnection() == null ? VanillaRegistries.createLookup() : MainUtil.client.getConnection().registryAccess());
+		HolderLookup.Provider registryLookup = (MainUtil.client.getConnection() == null ? VanillaRegistries.createWorldLookup() : MainUtil.client.getConnection().registryAccess());
 		
 		CompoundTag output = new CompoundTag();
 		sErrorReporter errorReporter = new sErrorReporter();
@@ -51,7 +51,7 @@ public class ComponentBlockEntityNBTManager implements NBTManager<BlockEntity> {
 	}
 	@Override
 	public CompoundTag getNbt(BlockEntity subject) {
-		return subject.saveWithoutMetadata((MainUtil.client.getConnection() == null ? VanillaRegistries.createLookup() : MainUtil.client.getConnection().registryAccess()));
+		return subject.saveWithoutMetadata((MainUtil.client.getConnection() == null ? VanillaRegistries.createWorldLookup() : MainUtil.client.getConnection().registryAccess()));
 	}
 	@Override
 	public CompoundTag getOrCreateNbt(BlockEntity subject) {
@@ -59,7 +59,7 @@ public class ComponentBlockEntityNBTManager implements NBTManager<BlockEntity> {
 	}
 	@Override
 	public void setNbt(BlockEntity subject, CompoundTag nbt) {
-		subject.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,(MainUtil.client.getConnection() == null ? VanillaRegistries.createLookup() : MainUtil.client.getConnection().registryAccess()),nbt));
+		subject.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,(MainUtil.client.getConnection() == null ? VanillaRegistries.createWorldLookup() : MainUtil.client.getConnection().registryAccess()),nbt));
 	}
 	
 }

@@ -4,12 +4,12 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.*;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlayScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -133,11 +133,11 @@ public class ImageToLoreWidget extends GroupWidget implements InitializableOverl
 	@Override
 	public boolean keyPressed(KeyEvent keyInput) {
 		int keyCode = keyInput.key();
-		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+		if (keyCode == InputConstants.KEY_ESCAPE) {
 			OverlaySupportingScreen.setOverlayStatic(null);
 			return true;
 		}
-		if (keyCode == GLFW.GLFW_KEY_ENTER) {
+		if (keyCode == InputConstants.KEY_RETURN) {
 			optionsConsumer.accept(Optional.of(new ImageToLoreOptions(
 					MainUtil.parseOptionalInt(imgWidth.getValue()), MainUtil.parseOptionalInt(imgHeight.getValue()))));
 			return true;

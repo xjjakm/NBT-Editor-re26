@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -8,7 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -66,7 +66,7 @@ public class MVSliderWidget extends MVButtonWidget {
 	
 	@Override
 	public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-		if (click.button() != GLFW.GLFW_MOUSE_BUTTON_1 || !isMouseOver(click.x(), click.y()))
+		if (click.button() != InputConstants.MOUSE_BUTTON_LEFT || !isMouseOver(click.x(), click.y()))
 			return false;
 		setValueFromMouse(click.x());
 		return true;
@@ -74,7 +74,7 @@ public class MVSliderWidget extends MVButtonWidget {
 	
 	@Override
 	public boolean mouseDragged(MouseButtonEvent click, double deltaX, double deltaY) {
-		if (click.button() != GLFW.GLFW_MOUSE_BUTTON_1)
+		if (click.button() != InputConstants.MOUSE_BUTTON_LEFT)
 			return false;
 		setValueFromMouse(click.x());
 		return true;
@@ -82,7 +82,7 @@ public class MVSliderWidget extends MVButtonWidget {
 	
 	@Override
 	public boolean mouseReleased(MouseButtonEvent click) {
-		if (click.button() != GLFW.GLFW_MOUSE_BUTTON_1)
+		if (click.button() != InputConstants.MOUSE_BUTTON_LEFT)
 			return false;
 		playDownSound(Minecraft.getInstance().getSoundManager());
 		return true;

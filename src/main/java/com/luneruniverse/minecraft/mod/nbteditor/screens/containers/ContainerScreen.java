@@ -12,13 +12,13 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.It
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
 
 public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 	
@@ -134,7 +134,7 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		}
 		
 		if (hoveredSlot != null && (hoveredSlot.index < numSlots || hoveredSlot.container != this.menu.getContainer())) {
-			if (keyInput.key() != GLFW.GLFW_KEY_DELETE || !getLockedSlotsInfo().isBlocked(hoveredSlot, true)) {
+			if (keyInput.key() != InputConstants.KEY_DELETE || !getLockedSlotsInfo().isBlocked(hoveredSlot, true)) {
 				if (handleKeybind(keyInput.key(), hoveredSlot, () -> show(ref), slot -> getContainerRef(slot.getContainerSlot())))
 					return true;
 			}

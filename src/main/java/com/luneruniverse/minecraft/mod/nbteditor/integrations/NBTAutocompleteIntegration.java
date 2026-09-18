@@ -11,7 +11,7 @@ import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.mt1006.nbtac.autocomplete.SuggestionManager;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -19,8 +19,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
-
-import net.fabricmc.loader.api.FabricLoader;
+import net.mt1006.nbtac.autocomplete.SuggestionManager;
 
 import java.util.Collection;
 import java.util.List;
@@ -189,7 +188,7 @@ public class NBTAutocompleteIntegration extends Integration {
 			name = name.substring("item/".length());
 			int shift = name.length();
 			SuggestionsBuilder builder = new SuggestionsBuilder(name + tag, 0);
-			return new ItemParser((MainUtil.client.getConnection() == null ? VanillaRegistries.createLookup() : MainUtil.client.getConnection().registryAccess())).fillSuggestions(builder).thenApply(suggestions -> new Suggestions(shiftRange(suggestions.getRange(), -shift), suggestions.getList().stream()
+			return new ItemParser((MainUtil.client.getConnection() == null ? VanillaRegistries.createWorldLookup() : MainUtil.client.getConnection().registryAccess())).fillSuggestions(builder).thenApply(suggestions -> new Suggestions(shiftRange(suggestions.getRange(), -shift), suggestions.getList().stream()
                     .map(suggestion -> shiftSuggestion(suggestion, -shift)).collect(Collectors.toList())));
 		}
 		// 2.0.1: loadFromName(name, input, builder, dispatchImmediately) → get(input, name, builder, suggestPath)

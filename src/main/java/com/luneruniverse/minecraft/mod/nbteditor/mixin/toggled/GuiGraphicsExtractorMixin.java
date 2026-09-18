@@ -30,7 +30,7 @@ public abstract class GuiGraphicsExtractorMixin {
 
 	@Inject(method = "tooltip", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix3x2fStack;pushMatrix()Lorg/joml/Matrix3x2fStack;", shift = At.Shift.AFTER))
 	@Group(name = "renderTooltip", min = 1)
-	private void drawTooltip(Font textRenderer, List<ClientTooltipComponent> tooltip, int x, int y, ClientTooltipPositioner positioner, Identifier texture, CallbackInfo info) {
+	private void drawTooltip(Font textRenderer, List<ClientTooltipComponent> tooltip, int x, int y, ClientTooltipPositioner positioner, Identifier texture, boolean flag, CallbackInfo info) {
 		drawTooltip_impl(tooltip, x, y, positioner);
 	}
 	@Unique

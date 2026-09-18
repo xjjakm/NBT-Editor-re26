@@ -1,15 +1,13 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.function.Consumer;
-
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.*;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlayScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.input.CharacterEvent;
@@ -23,7 +21,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class ItemSelectOverlay extends GroupWidget implements InitializableOverlay<OverlaySupportingScreen> {
 	
@@ -201,7 +203,7 @@ public class ItemSelectOverlay extends GroupWidget implements InitializableOverl
 	
 	@Override
 	public boolean keyPressed(KeyEvent keyInput) {
-		if (keyInput.key() == GLFW.GLFW_KEY_ESCAPE) {
+		if (keyInput.key() == InputConstants.KEY_ESCAPE) {
 			close.run();
 			return true;
 		}

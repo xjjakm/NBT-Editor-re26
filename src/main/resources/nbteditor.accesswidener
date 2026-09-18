@@ -50,10 +50,7 @@ accessible field net/minecraft/nbt/StringTagVisitor UNQUOTED_KEY_MATCH Ljava/uti
 
 accessible field net/minecraft/core/Holder$Reference owner Lnet/minecraft/core/HolderOwner;
 
-accessible class com/mojang/blaze3d/opengl/GlStateManager$ScissorState
-accessible class com/mojang/blaze3d/opengl/GlStateManager$BooleanState
-accessible field com/mojang/blaze3d/opengl/GlStateManager SCISSOR Lcom/mojang/blaze3d/opengl/GlStateManager$ScissorState;
-accessible field com/mojang/blaze3d/opengl/GlStateManager$BooleanState enabled Z
+# 26.3: GlStateManager 用反射访问，不再需要 widener
 
 accessible field net/minecraft/client/Minecraft fontManager Lnet/minecraft/client/gui/font/FontManager;
 accessible field net/minecraft/client/gui/font/FontManager fontSets Ljava/util/Map;

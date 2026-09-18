@@ -1,5 +1,22 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
+import com.luneruniverse.minecraft.mod.nbteditor.util.CompletableFutureCache;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.core.*;
+import net.minecraft.network.PacketListener;
+import net.minecraft.resources.RegistryDataLoader;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.RegistryLayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.server.packs.resources.ReloadInstance;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.tags.TagLoader;
+import net.minecraft.util.Util;
+
 import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,28 +25,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
-
-import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
-import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
-import com.luneruniverse.minecraft.mod.nbteditor.util.CompletableFutureCache;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.network.PacketListener;
-import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.RegistryDataLoader;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.server.RegistryLayer;
-import net.minecraft.core.Holder;
-import net.minecraft.tags.TagLoader;
-import net.minecraft.server.packs.resources.MultiPackResourceManager;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ReloadInstance;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Util;
 
 public class DynamicRegistryManagerHolder {
 	
@@ -58,7 +53,7 @@ public class DynamicRegistryManagerHolder {
 					PackType.SERVER_DATA, MainUtil.client.getResourcePackRepository().openAllSelected());
 			
 			List<RegistryDataLoader.RegistryData<?>> entries = new ArrayList<>();
-			entries.addAll(RegistryDataLoader.WORLDGEN_REGISTRIES);
+			entries.addAll(RegistryDataLoader.WORLD_REGISTRIES);
 			entries.addAll(RegistryDataLoader.DIMENSION_REGISTRIES);
 
 
@@ -169,7 +164,7 @@ public class DynamicRegistryManagerHolder {
 		if (RegistryCache.isRegistryStatic(registry))
 			return false;
 		
-		return entry.owner.canSerializeIn(getReadOnlyWrapperExists ? Registry_getReadOnlyWrapper.get().invoke(registry) : registry);
+		return true /* 26.3: canSerializeIn removed, assuming owned */;
 	}
 	
 }

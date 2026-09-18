@@ -1,20 +1,18 @@
 package com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled;
 
-import java.util.stream.Stream;
-
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.RegistryCache;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderOwner;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.RegistryCache;
-
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderOwner;
-import net.minecraft.tags.TagKey;
+import java.util.stream.Stream;
 
 @Mixin(Holder.Reference.class)
 public abstract class RegistryEntryReferenceMixin<T> {
@@ -47,7 +45,7 @@ public abstract class RegistryEntryReferenceMixin<T> {
 	}
 	
 	@Inject(method = "canSerializeIn", at = @At("RETURN"), cancellable = true)
-	private void ownerEquals(HolderOwner<?> owner, CallbackInfoReturnable<Boolean> info) {
+	private void ownerEquals(HolderOwner<T> owner, CallbackInfoReturnable<Boolean> info) {
 		if (!info.getReturnValueZ()) {
 			if (DynamicRegistryManagerHolder.isOwnedByDefaultManager((Holder.Reference<?>) (Object) this))
 				info.setReturnValue(true);

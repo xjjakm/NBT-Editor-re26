@@ -1,21 +1,19 @@
 package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 
+import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
-import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
-
-import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.inventory.ContainerInput;
 
 @Mixin(AbstractContainerScreen.class)
 public class AbstractContainerScreenMixin {
@@ -39,6 +37,6 @@ public class AbstractContainerScreenMixin {
 		AbstractContainerScreen<?> source = (AbstractContainerScreen<?>) (Object) this;
 		if (source instanceof CreativeModeInventoryScreen || source instanceof ClientHandledScreen)
 			return;
-		MixinLink.keyPressed(source, input.key(), input.scancode(), input.modifiers(), cir);
+		MixinLink.keyPressed(source, input.key(), input.input(), input.modifiers(), cir);
 	}
 }

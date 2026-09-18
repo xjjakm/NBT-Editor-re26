@@ -6,10 +6,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
-
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.suggestion.Suggestions;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
@@ -22,9 +19,10 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.InvocationHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -188,22 +186,22 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		@Override
 		public boolean keyPressed(KeyEvent keyInput) {
 			int keyCode = keyInput.key();
-			if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+			if (keyCode == InputConstants.KEY_ESCAPE) {
 				OverlaySupportingScreen.setOverlayStatic(null);
 				return true;
 			}
-			if (keyCode == GLFW.GLFW_KEY_ENTER) {
+			if (keyCode == InputConstants.KEY_RETURN) {
 				goToNext(NBTEditor.hasShiftDown(), true);
 				return true;
 			}
-			if (keyCode == GLFW.GLFW_KEY_TAB) {
+			if (keyCode == InputConstants.KEY_TAB) {
 				if (getFocused() == find)
 					setFocused(replace);
 				else
 					setFocused(find);
 				return true;
 			}
-			if (keyCode == GLFW.GLFW_KEY_R && NBTEditor.hasControlDown() && !NBTEditor.hasShiftDown() && !NBTEditor.hasAltDown()) {
+			if (keyCode == InputConstants.KEY_R && NBTEditor.hasControlDown() && !NBTEditor.hasShiftDown() && !NBTEditor.hasAltDown()) {
 				regex = !regex;
 				regexBtn.setMessage(TextInst.translatable("nbteditor.multi_line_text.regex." + (regex ? "on" : "off")));
 				return true;
@@ -749,7 +747,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	@Override
 	public boolean keyPressed(KeyEvent keyInput) {
 		int keyCode = keyInput.key();
-		if (suggestor != null && (keyCode != GLFW.GLFW_KEY_UP && keyCode != GLFW.GLFW_KEY_DOWN || NBTEditor.hasAltDown())) {
+		if (suggestor != null && (keyCode != InputConstants.KEY_UP && keyCode != InputConstants.KEY_DOWN || NBTEditor.hasAltDown())) {
 			syncToSuggestor();
 			if (suggestor.keyPressed(keyInput)) {
 				syncFromSuggestor();
@@ -806,7 +804,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 			return true;
 		}
 		switch (keyCode) {
-			case GLFW.GLFW_KEY_LEFT: {
+			case InputConstants.KEY_LEFT: {
 				if (NBTEditor.hasControlDown()) {
 					this.setCursor(this.getWordSkipPosition(true, false), true);
 				} else {
@@ -815,7 +813,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 				cursorX = -1;
 				return true;
 			}
-			case GLFW.GLFW_KEY_RIGHT: {
+			case InputConstants.KEY_RIGHT: {
 				if (NBTEditor.hasControlDown()) {
 					this.setCursor(this.getWordSkipPosition(false, false), true);
 				} else {
@@ -824,41 +822,41 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 				cursorX = -1;
 				return true;
 			}
-			case GLFW.GLFW_KEY_UP: {
+			case InputConstants.KEY_UP: {
 				if (NBTEditor.hasControlDown())
 					setCursor(0, true);
 				else
 					moveCursorUp();
 				return true;
 			}
-			case GLFW.GLFW_KEY_DOWN: {
+			case InputConstants.KEY_DOWN: {
 				if (NBTEditor.hasControlDown())
 					setCursor(text.length(), true);
 				else
 					moveCursorDown();
 				return true;
 			}
-			case GLFW.GLFW_KEY_BACKSPACE: {
+			case InputConstants.KEY_BACKSPACE: {
 				this.erase(true);
 				cursorX = -1;
 				return true;
 			}
-			case GLFW.GLFW_KEY_DELETE: {
+			case InputConstants.KEY_DELETE: {
 				this.erase(false);
 				cursorX = -1;
 				return true;
 			}
-			case GLFW.GLFW_KEY_HOME: {
+			case InputConstants.KEY_HOME: {
 				setCursor(0, true);
 				cursorX = -1;
 				return true;
 			}
-			case GLFW.GLFW_KEY_END: {
+			case InputConstants.KEY_END: {
 				setCursor(text.length(), true);
 				cursorX = -1;
 				return true;
 			}
-			case GLFW.GLFW_KEY_ENTER: {
+			case InputConstants.KEY_RETURN: {
 				if (newLines && getNumNewLines(text) + 1 < maxLines) {
 					write("\n");
 					cursorX = -1;
@@ -891,13 +889,13 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	}
 	
 	public static boolean isUndo(int code) {
-		return code == GLFW.GLFW_KEY_Z && NBTEditor.hasControlDown() && !NBTEditor.hasShiftDown() && !NBTEditor.hasAltDown();
+		return code == InputConstants.KEY_Z && NBTEditor.hasControlDown() && !NBTEditor.hasShiftDown() && !NBTEditor.hasAltDown();
 	}
 	public static boolean isRedo(int code) {
-		return code == GLFW.GLFW_KEY_Y && NBTEditor.hasControlDown() && !NBTEditor.hasShiftDown() && !NBTEditor.hasAltDown();
+		return code == InputConstants.KEY_Y && NBTEditor.hasControlDown() && !NBTEditor.hasShiftDown() && !NBTEditor.hasAltDown();
 	}
 	public static boolean isFind(int code) {
-		return code == GLFW.GLFW_KEY_F && NBTEditor.hasControlDown() && !NBTEditor.hasShiftDown() && !NBTEditor.hasAltDown();
+		return code == InputConstants.KEY_F && NBTEditor.hasControlDown() && !NBTEditor.hasShiftDown() && !NBTEditor.hasAltDown();
 	}
 	
 	// passOneSpace requires that one section of whitespace is passed, either at the end or beginning of the search

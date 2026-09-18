@@ -28,10 +28,7 @@ public class RegistryCache {
 	
 	private static final Supplier<Reflection.MethodInvoker> Registry_getEntry =
 			Reflection.getOptionalMethod(Registry.class, "method_55841", MethodType.methodType(Optional.class, Identifier.class));
-	private static final boolean IS_1_21_2_PLUS = Version.<Boolean>newSwitch()
-			.range("1.21.2", null, true)
-			.range(null, "1.21.1", false)
-			.get();
+	private static final boolean IS_1_21_2_PLUS = true;
 	/**
 	 * @return May be null
 	 */
@@ -52,9 +49,7 @@ public class RegistryCache {
 	private static final Supplier<Reflection.MethodInvoker> Registry_getKey =
 			Reflection.getOptionalMethod(Registry.class, "method_30517", MethodType.methodType(ResourceKey.class));
 	private static final LoadingCache<Registry<?>, Boolean> staticRegistries = CacheBuilder.newBuilder().build(
-			CacheLoader.from(registry -> Version.<Boolean>newSwitch()
-                    .range("1.21.2", null, () -> BuiltInRegistries.REGISTRY.getValue(registry.key().identifier()) != null)
-                    .get()));
+			CacheLoader.from(registry -> BuiltInRegistries.REGISTRY.getValue(registry.key().identifier()) != null));
 	public static boolean isRegistryStatic(Registry<?> registry) {
 		return staticRegistries.getUnchecked(registry);
 	}
@@ -80,10 +75,7 @@ public class RegistryCache {
 			RegistryAccess registryManager = registryManagerRef.get();
 			if (registryManager == null)
 				return Optional.empty();
-			return Version.<Optional<? extends Registry<?>>>newSwitch()
-					.range("1.21.2", null, () -> registryManager.lookup(ResourceKey.createRegistryKey(id)))
-					.range(null, "1.21.1", () -> DynamicRegistryManager_getOptional.get().invoke(registryManager, ResourceKey.createRegistryKey(id)))
-					.get();
+		return registryManager.lookup(ResourceKey.createRegistryKey(id));
 		});
 	}
 	

@@ -8,12 +8,12 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestS
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix3x2fStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -147,8 +147,8 @@ public class ClientChestDataVersionScreen extends TickableSupportingScreen {
 	@Override
 	public boolean keyPressed(KeyEvent keyInput) {
 		int keyCode = keyInput.key();
-		if (keyCode == GLFW.GLFW_KEY_PAGE_UP || keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
-			boolean prev = (keyCode == GLFW.GLFW_KEY_PAGE_DOWN);
+		if (keyCode == InputConstants.KEY_PAGEUP || keyCode == InputConstants.KEY_PAGEDOWN) {
+			boolean prev = (keyCode == InputConstants.KEY_PAGEDOWN);
 			if (ConfigScreen.isInvertedPageKeybinds())
 				prev = !prev;
 			if (prev)
@@ -190,11 +190,7 @@ public class ClientChestDataVersionScreen extends TickableSupportingScreen {
 	}
 	
 	private void updateWithWarning(Runnable callback) {
-		if (Version.<Boolean>newSwitch()
-				.range("1.21", null, true)
-				.range("1.20.5", "1.20.6", false)
-				.range(null, "1.20.4", true)
-				.get()) {
+		if (true) {
 			callback.run();
 			return;
 		}
