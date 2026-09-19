@@ -20,8 +20,6 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 		output.add("toggled.GuiGraphicsExtractorMixin");
 		output.add("toggled.GuiRenderStateMixin");
 		output.add("toggled.ItemStackMixin");
-		output.add("toggled.RegistryEntryReferenceMixin");
-		output.add("toggled.Registry1Mixin");
 		output.add("toggled.TooltipMixin");
 		output.add("toggled.EnchantmentMixin");
 		output.add("toggled.ItemModelResolverMixin");

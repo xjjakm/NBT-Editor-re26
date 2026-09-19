@@ -5,7 +5,10 @@ import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 import com.luneruniverse.minecraft.mod.nbteditor.util.CompletableFutureCache;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.core.*;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.LayeredRegistryAccess;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.PacketListener;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.server.MinecraftServer;
@@ -31,7 +34,6 @@ public class DynamicRegistryManagerHolder {
 	private static final CompletableFutureCache<RegistryAccess> defaultManagerCache =
 			new CompletableFutureCache<>(DynamicRegistryManagerHolder::loadDefaultManagerImpl);
 	private static final Set<Thread> defaultManagerForced = ConcurrentHashMap.newKeySet();
-	private static volatile RegistryCache defaultManagerRegistryCache;
 	
 	private static volatile RegistryAccess clientManager;
 	private static volatile RegistryAccess serverManager;
@@ -139,32 +141,6 @@ public class DynamicRegistryManagerHolder {
 			callback.run();
 			return null;
 		});
-	}
-	
-	private static final boolean getReadOnlyWrapperExists = Version.<Boolean>newSwitch()
-			.range("1.21.2", null, false)
-			.range(null, "1.21.1", true)
-			.get();
-	private static final Supplier<Reflection.MethodInvoker> Registry_getReadOnlyWrapper =
-			Reflection.getOptionalMethod(Registry.class, "method_46771", MethodType.methodType(HolderLookup.RegistryLookup.class));
-	public static <T> boolean isOwnedByDefaultManager(Holder.Reference<T> entry) {
-		if (NBTEditorServer.isOnServerThread() || defaultManagerCache.getStatus() != CompletableFutureCache.Status.LOADED)
-			return false;
-		
-		if (defaultManagerRegistryCache == null)
-			defaultManagerRegistryCache = new RegistryCache(defaultManagerCache.get().join());
-		
-		@SuppressWarnings("unchecked")
-		Registry<T> registry = (Registry<T>) defaultManagerRegistryCache.getRegistry(entry.key().registry()).orElse(null);
-		if (registry == null)
-			return false;
-		
-		// Attempting to convert references in static registries to the current registry manager
-		// causes a stack overflow as the reference isn't changed
-		if (RegistryCache.isRegistryStatic(registry))
-			return false;
-		
-		return true /* 26.3: canSerializeIn removed, assuming owned */;
 	}
 	
 }

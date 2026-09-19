@@ -1,55 +1,88 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.nbt;
 
-import java.lang.invoke.MethodType;
-
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.DeserializableNBTManager;
 
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.world.item.ItemStack;
 
 public class NBTItemNBTManager implements DeserializableNBTManager<ItemStack> {
 	
-	private static final Reflection.MethodInvoker ItemStack_writeNbt =
-			Reflection.getMethod(ItemStack.class, "method_7953", MethodType.methodType(CompoundTag.class, CompoundTag.class));
-	@Override
-	public Attempt<CompoundTag> trySerialize(ItemStack subject) {
-		return new Attempt<>(ItemStack_writeNbt.invoke(subject, new CompoundTag()));
-	}
-	private static final Reflection.MethodInvoker ItemStack_fromNbt =
-			Reflection.getMethod(ItemStack.class, "method_7915", MethodType.methodType(ItemStack.class, CompoundTag.class));
-	@Override
-	public Attempt<ItemStack> tryDeserialize(CompoundTag nbt) {
-		return new Attempt<>(ItemStack_fromNbt.invoke(null, nbt.copy()));
+	/**
+	 * ItemStack.CODEC + RegistryOps 序列化到 CompoundTag
+	 * 结构: { id: "...", count: N, components: { ... } }
+	 */
+	private RegistryOps<net.minecraft.nbt.Tag> getOps() {
+		return RegistryOps.create(NbtOps.INSTANCE, DynamicRegistryManagerHolder.getManager());
 	}
 	
-	private static final Reflection.MethodInvoker ItemStack_hasNbt =
-			Reflection.getMethod(ItemStack.class, "method_7985", MethodType.methodType(boolean.class));
+	@Override
+	public Attempt<CompoundTag> trySerialize(ItemStack subject) {
+		if (subject.isEmpty())
+			return new Attempt<>(new CompoundTag());
+		try {
+			return new Attempt<>(ItemStack.CODEC.encodeStart(getOps(), subject)
+					.result()
+					.filter(tag -> tag instanceof CompoundTag)
+					.map(tag -> (CompoundTag) tag)
+					.orElse(new CompoundTag()));
+		} catch (Exception e) {
+			return new Attempt<>(new CompoundTag(), e.getMessage());
+		}
+	}
+	
+	@Override
+	public Attempt<ItemStack> tryDeserialize(CompoundTag nbt) {
+		try {
+			return new Attempt<>(ItemStack.CODEC.parse(getOps(), nbt)
+					.result()
+					.orElse(ItemStack.EMPTY));
+		} catch (Exception e) {
+			return new Attempt<>(ItemStack.EMPTY, e.getMessage());
+		}
+	}
+	
 	@Override
 	public boolean hasNbt(ItemStack subject) {
-		return ItemStack_hasNbt.invoke(subject);
+		if (subject.isEmpty())
+			return false;
+		// 26.3+: 有非默认 components 或 count != 1 就算有 NBT
+		if (subject.getCount() != 1)
+			return true;
+		return !subject.getComponentsPatch().isEmpty();
 	}
-	private static final Reflection.MethodInvoker ItemStack_getNbt =
-			Reflection.getMethod(ItemStack.class, "method_7969", MethodType.methodType(CompoundTag.class));
+	
 	@Override
 	public CompoundTag getNbt(ItemStack subject) {
-		CompoundTag nbt = ItemStack_getNbt.invoke(subject);
-		if (nbt == null)
+		if (subject.isEmpty())
 			return null;
-		return nbt.copy();
+		Attempt<CompoundTag> attempt = trySerialize(subject);
+		return attempt.value().map(CompoundTag::copy).orElse(null);
 	}
-	private static final Reflection.MethodInvoker ItemStack_getOrCreateNbt =
-			Reflection.getMethod(ItemStack.class, "method_7948", MethodType.methodType(CompoundTag.class));
+	
 	@Override
 	public CompoundTag getOrCreateNbt(ItemStack subject) {
-		return ((CompoundTag) ItemStack_getOrCreateNbt.invoke(subject)).copy();
+		if (subject.isEmpty())
+			return new CompoundTag();
+		Attempt<CompoundTag> attempt = trySerialize(subject);
+		return attempt.value().map(CompoundTag::copy).orElse(new CompoundTag());
 	}
-	private static final Reflection.MethodInvoker ItemStack_setNbt =
-			Reflection.getMethod(ItemStack.class, "method_7980", MethodType.methodType(void.class, CompoundTag.class));
+	
 	@Override
 	public void setNbt(ItemStack subject, CompoundTag nbt) {
-		ItemStack_setNbt.invoke(subject, nbt == null ? null : nbt.copy());
+		if (subject.isEmpty() || nbt == null)
+			return;
+		Attempt<ItemStack> attempt = tryDeserialize(nbt);
+		ItemStack result = attempt.value().orElse(null);
+		if (result == null || result.isEmpty())
+			return;
+		// 从 result 复制数据到 subject（替换 components + count）
+		// 保留原 Item 类型不变，只更新 components 和 count
+		subject.setCount(result.getCount());
+		subject.applyComponents(result.getComponentsPatch());
 	}
 	
 }

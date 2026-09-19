@@ -1,57 +1,60 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.nbt;
 
-import java.lang.invoke.MethodType;
-import java.util.function.Supplier;
-
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManager;
-import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.storage.TagValueInput;
 
 public class NBTBlockEntityNBTManager implements NBTManager<BlockEntity> {
 	
-	private static final Supplier<Reflection.MethodInvoker> BlockEntity_writeNbt =
-			Reflection.getOptionalMethod(BlockEntity.class, "method_11007", MethodType.methodType(CompoundTag.class, CompoundTag.class));
-	
-	private static final Supplier<Reflection.MethodInvoker> BlockEntity_createNbtWithId =
-			Reflection.getOptionalMethod(BlockEntity.class, "method_38243", MethodType.methodType(CompoundTag.class));
 	@Override
 	public Attempt<CompoundTag> trySerialize(BlockEntity subject) {
-		return new Attempt<>(Version.<CompoundTag>newSwitch()
-				.range("1.18.0", null, () -> BlockEntity_createNbtWithId.get().invoke(subject))
-				.range(null, "1.17.1", () -> BlockEntity_writeNbt.get().invoke(subject, new CompoundTag()))
-				.get());
+		try {
+			return new Attempt<>(subject.saveWithFullMetadata(DynamicRegistryManagerHolder.getManager()));
+		} catch (Exception e) {
+			return new Attempt<>(new CompoundTag(), e.getMessage());
+		}
 	}
 	
 	@Override
 	public boolean hasNbt(BlockEntity subject) {
 		return true;
 	}
-	private static final Supplier<Reflection.MethodInvoker> BlockEntity_createNbt =
-			Reflection.getOptionalMethod(BlockEntity.class, "method_38244", MethodType.methodType(CompoundTag.class));
+	
 	@Override
 	public CompoundTag getNbt(BlockEntity subject) {
-		return Version.<CompoundTag>newSwitch()
-				.range("1.18.0", null, () -> BlockEntity_createNbt.get().invoke(subject))
-				.range(null, "1.17.1", () -> {
-					ServerMixinLink.BLOCK_ENTITY_WRITE_NBT_WITHOUT_IDENTIFYING_DATA.add(Thread.currentThread());
-					return BlockEntity_writeNbt.get().invoke(subject, new CompoundTag());
-				})
-				.get();
+		try {
+			// saveWithoutMetadata: 包含自定义数据 + components，不含 id/pos 等 metadata
+			// 与旧版 createNbt（writeNbt 不含 identifying data）语义对齐
+			return subject.saveWithoutMetadata(DynamicRegistryManagerHolder.getManager());
+		} catch (Exception e) {
+			return new CompoundTag();
+		}
 	}
+	
 	@Override
 	public CompoundTag getOrCreateNbt(BlockEntity subject) {
 		return getNbt(subject);
 	}
-	private static final Reflection.MethodInvoker BlockEntity_readNbt =
-			Reflection.getMethod(BlockEntity.class, "method_11014", MethodType.methodType(void.class, CompoundTag.class));
+	
 	@Override
 	public void setNbt(BlockEntity subject, CompoundTag nbt) {
-		BlockEntity_readNbt.invoke(subject, nbt);
+		if (nbt == null)
+			return;
+		try {
+			// 用 loadWithComponents 覆盖 BlockEntity 的 components + 自定义数据
+			// 注意：不覆盖 pos/id 等 metadata（保持 BlockEntity 在世界中的身份）
+			subject.loadWithComponents(TagValueInput.create(
+					ProblemReporter.DISCARDING,
+					DynamicRegistryManagerHolder.getManager(),
+					nbt.copy()));
+		} catch (Exception ignored) {
+			// 反序列化失败时静默忽略，编辑器还能显示当前内容
+		}
 	}
 	
 }
