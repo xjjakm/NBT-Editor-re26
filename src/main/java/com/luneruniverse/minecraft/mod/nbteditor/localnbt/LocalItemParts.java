@@ -1,17 +1,10 @@
 package com.luneruniverse.minecraft.mod.nbteditor.localnbt;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.*;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
@@ -37,42 +30,29 @@ public class LocalItemParts extends LocalItem {
 		CompoundTag componentsNbt = null;
 		// Path 1: trySerialize with current registry manager
 		Attempt<CompoundTag> nbtAttempt = NBTManagers.ITEM.trySerialize(item);
-		System.err.println("[NBTEditor] LocalItemParts path1: success=" + nbtAttempt.isSuccessful() +
-				(!nbtAttempt.isSuccessful() ? " err=" + nbtAttempt.error() : ""));
 		if (nbtAttempt.isSuccessful()) {
 			componentsNbt = nbtAttempt.value().map(nbt ->
 					nbt.getCompoundOrEmpty("components")).orElse(null);
-			System.err.println("[NBTEditor] path1 componentsEmpty=" + (componentsNbt == null || componentsNbt.isEmpty()));
 		}
 		// Path 2: retry with default registry manager
 		if (componentsNbt == null || componentsNbt.isEmpty()) {
-			System.err.println("[NBTEditor] trying path2(default)");
 			nbtAttempt = MVMisc.withDefaultRegistryManager(() -> NBTManagers.ITEM.trySerialize(item));
-			System.err.println("[NBTEditor] path2: success=" + nbtAttempt.isSuccessful() +
-					(!nbtAttempt.isSuccessful() ? " err=" + nbtAttempt.error() : ""));
 			if (nbtAttempt.isSuccessful()) {
 				componentsNbt = nbtAttempt.value().map(nbt ->
 						nbt.getCompoundOrEmpty("components")).orElse(null);
-				System.err.println("[NBTEditor] path2 componentsEmpty=" + (componentsNbt == null || componentsNbt.isEmpty()));
 			}
 		}
 		// Path 3: use DataComponentPatch encoding directly with default registry
 		if (componentsNbt == null || componentsNbt.isEmpty()) {
-			System.err.println("[NBTEditor] trying path3(direct getNbt+default)");
 			try {
 				CompoundTag directNbt = MVMisc.withDefaultRegistryManager(() -> NBTManagers.ITEM.getNbt(item));
-				System.err.println("[NBTEditor] path3: null=" + (directNbt == null) + " empty=" + (directNbt != null && directNbt.isEmpty()));
 				if (directNbt != null && !directNbt.isEmpty()) {
 					componentsNbt = directNbt;
 				}
 			} catch (Exception e) {
-				System.err.println("[NBTEditor] path3 exception: " + e);
 				NBTEditor.LOGGER.warn("Could not serialize item components directly", e);
 			}
 		}
-		System.err.println("[NBTEditor] final: nbt_null=" + (componentsNbt == null) +
-				" empty=" + (componentsNbt != null && componentsNbt.isEmpty()) +
-				(componentsNbt != null ? " tag=" + componentsNbt : ""));
 		this.nbt = componentsNbt;
 		this.count = item.getCount();
 		

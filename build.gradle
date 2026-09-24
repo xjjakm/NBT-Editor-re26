@@ -51,8 +51,9 @@ dependencies {
 	
 	// modImplementation "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"
 
-	implementation "maven.modrinth:modmenu:20.0.1"
+	implementation "maven.modrinth:modmenu:21.0.0"
 	implementation "maven.modrinth:nbt-autocomplete:2.0.1-fabric-26.2"
+	compileOnly "maven.modrinth:imblocker-original:7.3.2"
 }
 
 processResources {

@@ -832,7 +832,9 @@ public class FormattedTextFieldWidget extends GroupWidget {
 
 	@Override
 	public void extractRenderState(Matrix3x2fStack matrices, int mouseX, int mouseY, float delta) {
-		setFocused(isMultiFocused() ? field : null);
+		// NOTE: 不再每帧 setFocused(isMultiFocused() ? field : null)
+		// 因为 AbstractContainerEventHandlerMixin 已经会在 setFocused 时同步 children 的 multi-focus
+		// 每帧 setFocused(null) 会通过 mixin 把 InternalTextFieldWidget 的 multi-focus 清掉！
 		field.extractRenderState(matrices, mouseX, mouseY, delta);
 		
 		if (colors != null) {
@@ -858,6 +860,18 @@ public class FormattedTextFieldWidget extends GroupWidget {
 	@Override
 	public boolean isMouseOver(double mouseX, double mouseY) {
 		return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
+	}
+
+	/**
+	 * 父级容器切换焦点时（DisplayScreen → FTW#1 vs FTW#2），
+	 * MVElement.setMultiFocused 只更新 FTW 自身状态，不会传播给内部 field。
+	 * 这里手动转发，保证 InternalTextFieldWidget 的 IMBlocker 焦点正确获取/释放。
+	 */
+	@Override
+	public void setMultiFocused(boolean focused) {
+		super.setMultiFocused(focused);
+		if (field != null)
+			field.setMultiFocused(focused);
 	}
 	
 }

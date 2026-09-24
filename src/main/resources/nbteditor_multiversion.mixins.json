@@ -1,25 +1,24 @@
-{
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.luneruniverse.minecraft.mod.nbteditor.multiversion.mixin",
-  "compatibilityLevel": "JAVA_16",
-  "plugin": "com.luneruniverse.minecraft.mod.nbteditor.multiversion.mixin.toggled.MVMixinPlugin",
-  "mixins": [
-    "FriendlyByteBufMixin",
-    "BlockEntityMixin",
-    "ItemStackMixin",
-    "CompoundTagMixin",
-    "CollectionTagMixin",
-    "NumericTagMixin"
-  ],
-  "client": [
-    "AbstractContainerMenuMixin",
-    "RenderableMixin",
-    "ScreenMixin",
-    "AbstractContainerEventHandlerMixin",
-    "ContainerEventHandlerMixin"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+﻿{
+    "required":  true,
+    "minVersion":  "0.8",
+    "package":  "com.luneruniverse.minecraft.mod.nbteditor.multiversion.mixin",
+    "compatibilityLevel":  "JAVA_16",
+    "plugin":  "com.luneruniverse.minecraft.mod.nbteditor.multiversion.mixin.toggled.MVMixinPlugin",
+    "mixins": [
+      "BlockEntityMixin",
+      "CollectionTagMixin",
+      "CompoundTagMixin",
+      "FriendlyByteBufMixin",
+      "ItemStackMixin",
+      "NumericTagMixin"
+    ],
+    "client": [
+      "AbstractContainerEventHandlerMixin",
+      "AbstractContainerMenuMixin",
+      "RenderableMixin",
+      "ScreenMixin"
+    ],
+    "injectors":  {
+                      "defaultRequire":  1
+                  }
 }

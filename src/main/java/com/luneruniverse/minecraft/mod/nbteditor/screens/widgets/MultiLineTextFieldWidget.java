@@ -21,8 +21,6 @@ import net.minecraft.util.Util;
 import org.joml.Matrix3x2fStack;
 
 import java.awt.*;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.InvocationHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable, NarratableEntry {
+public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable, NarratableEntry, io.github.reserveword.imblocker.common.gui.MinecraftFocusableWidget {
 	
 	private class FindAndReplaceWidget extends TranslatedGroupWidget {
 		private static String findValue = "";
@@ -272,59 +270,34 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	
 	private SuggestingTextFieldWidget suggestor;
 
-	// IMBlocker proxy — caches the java.lang.reflect.Proxy returned by
-	// IMBlockerCompat.notifyFocusChange so we remove the same proxy we registered.
-	private transient Object imblockerFocusProxy;
-	// Lazily initialized InvocationHandler for the above proxy.
-	private transient InvocationHandler imblockerProxyHandler;
+	// ---- IMBlocker MinecraftFocusableWidget 实现 ----
+	// 直接实现接口，由 IMBlocker 调用我们
 
-	private InvocationHandler getIMBlockerProxyHandler() {
-		if (imblockerProxyHandler == null) {
-			imblockerProxyHandler = (proxy, method, args) -> switch (method.getName()) {
-				case "getBoundsAbs" ->
-					IMBlockerCompat.newRectangle(IMBlockerCompat.getGuiScale(), x, y, width, height);
-				case "getCaretPos" -> {
-					Point c = getXYPos(this.cursor);
-					yield IMBlockerCompat.newPoint(IMBlockerCompat.getGuiScale(), c.x, c.y);
-				}
-				case "getGuiScale" -> IMBlockerCompat.getGuiScale();
-				case "isRenderable" -> true; // always rendered when focused
-				case "getFocusContainer" -> null; // will be filled via default method (MINECRAFT)
-				case "getPreferredState" -> true; // want IME enabled
-				case "getPreferredEnglishState" -> false; // prefer Chinese mode
-				case "getFontHeight" -> textRenderer.lineHeight;
-				case "equals" -> proxy == args[0];
-				case "hashCode" -> System.identityHashCode(proxy);
-				case "toString" -> "NBTEditorMultiLineIFWidget@" + System.identityHashCode(proxy);
-				default -> {
-					Class<?> decl = method.getDeclaringClass();
-					if (decl.isInterface()) {
-						// Satisfy default methods the caller does not override:
-						// isTrulyFocused / updateIMState / updateEnglishState / deliverFocus /
-						// lostFocus / imblocker$onFocusChanged / imblocker$onFocusGained /
-						// imblocker$onFocusLost / imblocker$onBoundsChanged / etc.
-						try {
-							yield MethodHandles.privateLookupIn(decl, MethodHandles.lookup())
-									.unreflectSpecial(method, decl)
-									.bindTo(proxy)
-									.invokeWithArguments(args);
-						} catch (Throwable ignored) {
-							// Methods without default implementations: return sensible default
-							yield switch (method.getReturnType().getName()) {
-								case "boolean" -> false;
-								case "int", "short", "byte", "char" -> 0;
-								case "long" -> 0L;
-								case "float" -> 0f;
-								case "double" -> 0d;
-								default -> null;
-							};
-						}
-					}
-					yield null;
-				}
-			};
-		}
-		return imblockerProxyHandler;
+	@Override
+	public boolean getPreferredState() {
+		return true;
+	}
+
+	@Override
+	public io.github.reserveword.imblocker.common.gui.Rectangle getBoundsAbs() {
+		return new io.github.reserveword.imblocker.common.gui.Rectangle(
+				io.github.reserveword.imblocker.common.gui.FocusContainer.MINECRAFT.getInternalGuiScale(),
+				x, y, width, height);
+	}
+
+	@Override
+	public io.github.reserveword.imblocker.common.gui.Point getCaretPos() {
+		java.awt.Point widgetLocal = getXYPos(this.cursor);
+		double relX = widgetLocal.getX() - x;
+		double relY = widgetLocal.getY() - y - scroll;
+		return new io.github.reserveword.imblocker.common.gui.Point(
+				io.github.reserveword.imblocker.common.gui.FocusContainer.MINECRAFT.getInternalGuiScale(),
+				relX, relY);
+	}
+
+	@Override
+	public int getFontHeight() {
+		return textRenderer.lineHeight;
 	}
 
 	protected MultiLineTextFieldWidget(int x, int y, int width, int height, String text,
@@ -428,9 +401,12 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		if (suggestor.getCursorPosition() != cursor)
 			MVMisc.setCursor(suggestor, cursor);
 
+		// 使用 setMultiFocused 而不是 setFocused，避免触发 MVTextFieldWidget.setFocused()
+		// 进而触发 EditBox.setFocused → IMBlocker TextFieldMixin 抢焦点。
+		// suggestor 只是用来显示下拉建议的隐藏输入框，不应该成为真正的 IMBlocker 焦点目标。
 		boolean focus = isMultiFocused();
 		if (suggestor.isMultiFocused() != focus)
-			suggestor.setFocused(focus); // Use setFocused to trigger IMBlocker's EditBox mixin
+			suggestor.setMultiFocused(focus);
 	}
 	private void syncFromSuggestor() {
 		if (!suggestor.value.equals(text))
@@ -456,8 +432,9 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	public void setText(String text) {
 		if (this.text.equals(text))
 			return;
+		System.err.println("[NBTEditor-ST] setText called, oldLen=" + this.text.length() + " newLen=" + text.length() + " stack=" + (new Throwable().getStackTrace()[2] + ""));
 		selStart = 0;
-		selEnd = this.text.length();
+		selEnd = text.length();
 		write(text);
 	}
 	public String getText() {
@@ -512,6 +489,8 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	protected void renderHighlightsBelow(Matrix3x2fStack matrices, int mouseX, int mouseY, float delta) {}
 	protected void renderHighlightsAbove(Matrix3x2fStack matrices, int mouseX, int mouseY, float delta) {}
 	protected void renderHighlight(Matrix3x2fStack matrices, int start, int end, int color) {
+		if (start == end)
+			return;
 		Point startPos = getXYPos(start);
 		Point endPos = getXYPos(end);
 		if (startPos.y == endPos.y)
@@ -568,9 +547,21 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 			renderedLines.add(emptyLine);
 		}
 	}
-	
+
+	// 注意：Minecraft 26.3 的 GuiEventListener 接口已经升级，所有事件方法
+	// 直接用 MV 签名（MouseButtonEvent、KeyEvent、CharacterEvent）！
+	// MultiLineTextFieldWidget 的 mouseClicked(MouseButtonEvent, boolean) 等
+	// 方法直接就是 override GuiEventListener 的 default 方法 ✅
+	// 所以 GroupWidget/Screen 容器能正确把事件传给我们。
+	// 只有 setFocused(boolean)/isFocused() 是 abstract（被 MVElement 实现）
+
 	@Override
 	public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
+		// Activate our own IMBlocker focus BEFORE suggestor runs, so that
+		// IMBlocker sees us as the true focus owner.
+		if (!isMultiFocused())
+			setMultiFocused(true);
+		
 		if (suggestor != null) {
 			syncToSuggestor();
 			if (suggestor.mouseClicked(click, doubled)) {
@@ -1028,19 +1019,20 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		if (focused == prevFocused)
 			return;
 
-		// Try IMBlocker first — if installed it cancels vanilla onTextInputFocusChange.
-		// We register a java.lang.reflect.Proxy implementing MinecraftFocusableWidget
-		// so that IMBlocker's FocusContainer knows about this widget and enables IME
-		// via ImmAssociateContext (Windows) / SDL text input (SDL platforms).
-		Object registered = IMBlockerCompat.notifyFocusChange(
-				getIMBlockerProxyHandler(), focused, imblockerFocusProxy);
-		if (registered != null) {
-			imblockerFocusProxy = focused ? registered : null;
-			return;
-		}
+		System.err.println("[NBTEditor] onMultiFocusedSet focused=" + focused + " this=" + Integer.toHexString(System.identityHashCode(this)));
 
-		// Fallback: vanilla Minecraft IME path (no IMBlocker present).
-		net.minecraft.client.Minecraft.getInstance().onTextInputFocusChange(this, focused);
+		// IMBlocker MinecraftFocusableWidget 直接实现
+		var container = io.github.reserveword.imblocker.common.gui.FocusContainer.MINECRAFT;
+		try {
+			if (focused) {
+				container.requestFocus(this);
+			} else {
+				container.removeFocus(this);
+			}
+			System.err.println("[NBTEditor] IMBlocker OK, focusOwner=" + io.github.reserveword.imblocker.common.gui.FocusManager.getFocusOwner());
+		} catch (Throwable t) {
+			System.err.println("[NBTEditor] IMBlocker FAILED: " + t.getClass().getSimpleName() + ": " + t.getMessage());
+		}
 	}
 	
 }

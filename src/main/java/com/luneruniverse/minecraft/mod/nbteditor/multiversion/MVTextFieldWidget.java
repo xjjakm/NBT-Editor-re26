@@ -51,6 +51,7 @@ public class MVTextFieldWidget extends EditBox implements Tickable, MVElement {
 	@Override
 	@Deprecated
 	public void setFocused(boolean focused) {
+		System.err.println("[NBTEditor-MVTFW] setFocused focused=" + focused + " this=" + Integer.toHexString(System.identityHashCode(this)) + " class=" + this.getClass().getSimpleName());
 		// Update multi-focus state first so that isFocused() returns the correct
 		// value when IMBlocker's TextFieldMixin calls canConsumeInput() (which
 		// checks isFocused()) at the TAIL of super.setFocused().

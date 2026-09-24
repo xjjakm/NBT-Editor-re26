@@ -6,7 +6,10 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.input.*;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.PreeditEvent;
 import org.joml.Matrix3x2fStack;
 import org.jspecify.annotations.Nullable;
 
@@ -93,13 +96,9 @@ public abstract class Panel<T extends Renderable & GuiEventListener> implements 
 		getPanelElements().forEach(output::add);
 		return output;
 	}
-	/** The child element that currently has focus. All key/char/preedit events
-	 *  and drag events (when dragging==true && button==1) are routed only to this child.
-	 *  Mirrors ContainerEventHandler.getFocused() semantics. */
+	/** The child element that currently has focus. All mouse/keyboard/IME events
+	 *  are routed only to this child once set, regardless of button or drag state. */
 	protected T focusedChild;
-	/** Whether the user is currently dragging (button 1 / left button).
-	 *  Mirrors ContainerEventHandler.isDragging() / setDragging(). */
-	protected boolean dragging;
 	
 	protected boolean continueEvents() {
 		return false;
@@ -107,23 +106,34 @@ public abstract class Panel<T extends Renderable & GuiEventListener> implements 
 	protected void updateMousePos(double mouseX, double mouseY) {}
 	
 	
+	private void clearChildFocus() {
+		if (focusedChild instanceof MVElement mv)
+			mv.setMultiFocused(false);
+		focusedChild = null;
+	}
+	
+	private void setChildFocused(T child) {
+		// Clear previous
+		if (focusedChild != child && focusedChild instanceof MVElement mv)
+			mv.setMultiFocused(false);
+		focusedChild = child;
+		if (child instanceof MVElement mv)
+			mv.setMultiFocused(true);
+	}
+	
 	@Override
 	public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
 		updateMousePos(click.x(), click.y());
 		
-		if (scrollBar.mouseClicked(click,doubled)) {
-			focusedChild = null;
-			dragging = false;
+		if (scrollBar.mouseClicked(click, doubled)) {
+			clearChildFocus();
 			return true;
 		}
 		
-		focusedChild = null;
+		clearChildFocus();
 		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
-			if (pos.element().mouseClicked(new MouseButtonEvent(click.x() - pos.x() - x, click.y() - pos.y() - y - scroll, new MouseButtonInfo(click.button(),0)),doubled)) {
-				focusedChild = pos.element();
-				// Mirror ContainerEventHandler: set dragging on button 1
-				if (click.button() == 1)
-					dragging = true;
+			if (pos.element().mouseClicked(new MouseButtonEvent(click.x() - pos.x() - x, click.y() - pos.y() - y - scroll, click.buttonInfo()), doubled)) {
+				setChildFocused(pos.element());
 				if (!continueEvents())
 					break;
 			}
@@ -135,15 +145,11 @@ public abstract class Panel<T extends Renderable & GuiEventListener> implements 
 	public boolean mouseReleased(MouseButtonEvent click) {
 		updateMousePos(click.x(), click.y());
 		
-		// Mirror ContainerEventHandler: only handle button 1 release during a drag
-		if (click.button() == 1 && dragging) {
-			dragging = false;
-			if (focusedChild != null) {
-				for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
-					if (pos.element() == focusedChild) {
-						return pos.element().mouseReleased(new MouseButtonEvent(click.x() - pos.x() - x, click.y() - pos.y() - y - scroll, click.buttonInfo()));
-					}
-				}
+		if (focusedChild == null)
+			return false;
+		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
+			if (pos.element() == focusedChild) {
+				return pos.element().mouseReleased(new MouseButtonEvent(click.x() - pos.x() - x, click.y() - pos.y() - y - scroll, click.buttonInfo()));
 			}
 		}
 		return false;
@@ -164,10 +170,8 @@ public abstract class Panel<T extends Renderable & GuiEventListener> implements 
 		if (scrollBar.mouseDragged(click, deltaX, deltaY))
 			return true;
 		
-		// Mirror ContainerEventHandler: only route to focusedChild when dragging button 1
-		if (focusedChild == null || !dragging || click.button() != 1)
+		if (focusedChild == null)
 			return false;
-		
 		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
 			if (pos.element() == focusedChild) {
 				return pos.element().mouseDragged(new MouseButtonEvent(click.x() - pos.x() - x, click.y() - pos.y() - y - scroll, click.buttonInfo()), deltaX, deltaY);
@@ -203,46 +207,36 @@ public abstract class Panel<T extends Renderable & GuiEventListener> implements 
 		return 0;
 	}
 	
+	/** Helper: locate focusedChild's position in the panel element list. */
+	private PositionedPanelElement<T> findFocusedPos() {
+		if (focusedChild == null)
+			return null;
+		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
+			if (pos.element() == focusedChild)
+				return pos;
+		}
+		return null;
+	}
 	
 	@Override
 	public boolean keyPressed(KeyEvent keyInput) {
-		if (focusedChild == null)
-			return false;
-		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
-			if (pos.element() == focusedChild)
-				return pos.element().keyPressed(keyInput);
-		}
-		return false;
+		PositionedPanelElement<T> pos = findFocusedPos();
+		return pos != null && pos.element().keyPressed(keyInput);
 	}
 	@Override
 	public boolean keyReleased(KeyEvent keyInput) {
-		if (focusedChild == null)
-			return false;
-		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
-			if (pos.element() == focusedChild)
-				return pos.element().keyReleased(keyInput);
-		}
-		return false;
+		PositionedPanelElement<T> pos = findFocusedPos();
+		return pos != null && pos.element().keyReleased(keyInput);
 	}
 	@Override
 	public boolean charTyped(CharacterEvent charInput) {
-		if (focusedChild == null)
-			return false;
-		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
-			if (pos.element() == focusedChild)
-				return pos.element().charTyped(charInput);
-		}
-		return false;
+		PositionedPanelElement<T> pos = findFocusedPos();
+		return pos != null && pos.element().charTyped(charInput);
 	}
 	@Override
 	public boolean preeditUpdated(@Nullable PreeditEvent event) {
-		if (focusedChild == null)
-			return false;
-		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
-			if (pos.element() == focusedChild)
-				return pos.element().preeditUpdated(event);
-		}
-		return false;
+		PositionedPanelElement<T> pos = findFocusedPos();
+		return pos != null && pos.element().preeditUpdated(event);
 	}
 	
 }

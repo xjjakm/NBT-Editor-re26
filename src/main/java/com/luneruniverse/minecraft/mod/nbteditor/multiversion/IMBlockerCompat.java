@@ -1,15 +1,13 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection.MethodInvoker;
+import net.minecraft.client.Minecraft;
+
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.function.Supplier;
-
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection.MethodInvoker;
-
-import net.minecraft.client.Minecraft;
 
 /**
  * Compatibility layer for IMBlocker mod (https://github.com/ reserveword/IMBlocker).
@@ -71,6 +69,11 @@ public final class IMBlockerCompat {
 		return MINECRAFT_CONTAINER.get() != null;
 	}
 
+	/** Returns IMBlocker's FocusContainer.MINECRAFT singleton (null if not installed). */
+	public static Object getMinecraftContainer() {
+		return MINECRAFT_CONTAINER.get();
+	}
+
 	/**
 	 * Notify IMBlocker's focus manager that a non-EditBox widget has gained/lost
 	 * focus. For MultiLineTextFieldWidget which bypasses Minecraft's widget hierarchy.
@@ -114,10 +117,18 @@ public final class IMBlockerCompat {
 			return null;
 		}
 	}
-	public static Object newPoint(double guiScale, int x, int y) {
+	public static Object newPoint(double guiScale, double x, double y) {
 		try {
-			return POINT_CLASS.get().getConstructor(double.class, int.class, int.class).newInstance(guiScale, x, y);
-		} catch (Throwable ignored) {
+			if (POINT_CLASS.get() == null) {
+				System.err.println("[NBTEditor-IMBlocker] POINT_CLASS is null!");
+				return null;
+			}
+			Object result = POINT_CLASS.get().getConstructor(double.class, double.class, double.class).newInstance(guiScale, x, y);
+			System.err.println("[NBTEditor-IMBlocker] newPoint scale=" + guiScale + " x=" + x + " y=" + y + " -> " + result);
+			return result;
+		} catch (Throwable t) {
+			System.err.println("[NBTEditor-IMBlocker] newPoint FAILED: " + t.getClass().getSimpleName() + ": " + t.getMessage());
+			t.printStackTrace(System.err);
 			return null;
 		}
 	}
@@ -128,9 +139,9 @@ public final class IMBlockerCompat {
 			return null;
 		}
 	}
-	public static Object newRectangle(double guiScale, int x, int y, int w, int h) {
+	public static Object newRectangle(double guiScale, double x, double y, double w, double h) {
 		try {
-			return RECTANGLE_CLASS.get().getConstructor(double.class, int.class, int.class, int.class, int.class)
+			return RECTANGLE_CLASS.get().getConstructor(double.class, double.class, double.class, double.class, double.class)
 					.newInstance(guiScale, x, y, w, h);
 		} catch (Throwable ignored) {
 			return null;
