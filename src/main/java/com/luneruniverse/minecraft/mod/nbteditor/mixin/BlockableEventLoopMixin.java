@@ -1,20 +1,20 @@
 package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 
-import java.util.WeakHashMap;
-
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import net.minecraft.util.thread.BlockableEventLoop;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
-import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
-
-import net.minecraft.util.thread.BlockableEventLoop;
+import java.util.WeakHashMap;
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(BlockableEventLoop.class)
 public class BlockableEventLoopMixin {
@@ -27,14 +27,9 @@ public class BlockableEventLoopMixin {
 	private void send_new(Runnable runnable, CallbackInfo info) {
 		stackTraces.put(runnable, new Exception("Stack trace"));
 	}
-	// TODO(Ravel): remapper for org.spongepowered.asm.mixin.injection.Group is not implemented
-// TODO(Ravel): target method method_18858 with the signature not found
-// TODO(Ravel): remapper for org.spongepowered.asm.mixin.injection.Group is not implemented
-// TODO(Ravel): target method method_18858 with the signature not found
-    @Inject(method = "method_18858(Ljava/lang/Runnable;)V", at = @At("HEAD"), remap = false)
+	@Inject(method = "submit(Ljava/lang/Runnable;)Ljava/util/concurrent/CompletableFuture;", at = @At("HEAD"), remap = false)
 	@Group(name = "send", min = 1)
-	@SuppressWarnings("target")
-	private void send_old(Runnable runnable, CallbackInfo info) {
+	private void submit(Runnable runnable, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
 		stackTraces.put(runnable, new Exception("Stack trace"));
 	}
 	

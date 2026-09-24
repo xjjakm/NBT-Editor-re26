@@ -6,11 +6,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.MouseButtonInfo;
+import net.minecraft.client.input.*;
 import org.joml.Matrix3x2fStack;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,9 +93,16 @@ public abstract class Panel<T extends Renderable & GuiEventListener> implements 
 		getPanelElements().forEach(output::add);
 		return output;
 	}
+	/** The child element that currently has focus. All key/char/preedit events
+	 *  and drag events (when dragging==true && button==1) are routed only to this child.
+	 *  Mirrors ContainerEventHandler.getFocused() semantics. */
+	protected T focusedChild;
+	/** Whether the user is currently dragging (button 1 / left button).
+	 *  Mirrors ContainerEventHandler.isDragging() / setDragging(). */
+	protected boolean dragging;
+	
 	protected boolean continueEvents() {
-		return false; // First widget that handles the event wins — prevents ALL EditBoxes
-		// from calling setFocused(true) when clicking one of them.
+		return false;
 	}
 	protected void updateMousePos(double mouseX, double mouseY) {}
 	
@@ -106,33 +111,42 @@ public abstract class Panel<T extends Renderable & GuiEventListener> implements 
 	public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
 		updateMousePos(click.x(), click.y());
 		
-		if (scrollBar.mouseClicked(click,doubled))
+		if (scrollBar.mouseClicked(click,doubled)) {
+			focusedChild = null;
+			dragging = false;
 			return true;
+		}
 		
-		boolean success = false;
+		focusedChild = null;
 		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
 			if (pos.element().mouseClicked(new MouseButtonEvent(click.x() - pos.x() - x, click.y() - pos.y() - y - scroll, new MouseButtonInfo(click.button(),0)),doubled)) {
-				success = true;
+				focusedChild = pos.element();
+				// Mirror ContainerEventHandler: set dragging on button 1
+				if (click.button() == 1)
+					dragging = true;
 				if (!continueEvents())
 					break;
 			}
 		}
-		return success;
+		return focusedChild != null;
 	}
 	
 	@Override
 	public boolean mouseReleased(MouseButtonEvent click) {
 		updateMousePos(click.x(), click.y());
 		
-		boolean success = false;
-		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
-			if (pos.element().mouseReleased(new MouseButtonEvent(click.x() - pos.x() - x, click.y() - pos.y() - y - scroll, click.buttonInfo()))) {
-				success = true;
-				if (!continueEvents())
-					break;
+		// Mirror ContainerEventHandler: only handle button 1 release during a drag
+		if (click.button() == 1 && dragging) {
+			dragging = false;
+			if (focusedChild != null) {
+				for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
+					if (pos.element() == focusedChild) {
+						return pos.element().mouseReleased(new MouseButtonEvent(click.x() - pos.x() - x, click.y() - pos.y() - y - scroll, click.buttonInfo()));
+					}
+				}
 			}
 		}
-		return success;
+		return false;
 	}
 	
 	@Override
@@ -150,15 +164,16 @@ public abstract class Panel<T extends Renderable & GuiEventListener> implements 
 		if (scrollBar.mouseDragged(click, deltaX, deltaY))
 			return true;
 		
-		boolean success = false;
+		// Mirror ContainerEventHandler: only route to focusedChild when dragging button 1
+		if (focusedChild == null || !dragging || click.button() != 1)
+			return false;
+		
 		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
-			if (pos.element().mouseDragged(new MouseButtonEvent(click.x() - pos.x() - x, click.y() - pos.y() - y - scroll, click.buttonInfo()), deltaX, deltaY)) {
-				success = true;
-				if (!continueEvents())
-					break;
+			if (pos.element() == focusedChild) {
+				return pos.element().mouseDragged(new MouseButtonEvent(click.x() - pos.x() - x, click.y() - pos.y() - y - scroll, click.buttonInfo()), deltaX, deltaY);
 			}
 		}
-		return success;
+		return false;
 	}
 	
 	@Override
@@ -191,39 +206,43 @@ public abstract class Panel<T extends Renderable & GuiEventListener> implements 
 	
 	@Override
 	public boolean keyPressed(KeyEvent keyInput) {
-		boolean success = false;
+		if (focusedChild == null)
+			return false;
 		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
-			if (pos.element().keyPressed(keyInput)) {
-				success = true;
-				if (!continueEvents())
-					break;
-			}
+			if (pos.element() == focusedChild)
+				return pos.element().keyPressed(keyInput);
 		}
-		return success;
+		return false;
 	}
 	@Override
 	public boolean keyReleased(KeyEvent keyInput) {
-		boolean success = false;
+		if (focusedChild == null)
+			return false;
 		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
-			if (pos.element().keyReleased(keyInput)) {
-				success = true;
-				if (!continueEvents())
-					break;
-			}
+			if (pos.element() == focusedChild)
+				return pos.element().keyReleased(keyInput);
 		}
-		return success;
+		return false;
 	}
 	@Override
 	public boolean charTyped(CharacterEvent charInput) {
-		boolean success = false;
+		if (focusedChild == null)
+			return false;
 		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
-			if (pos.element().charTyped(charInput)) {
-				success = true;
-				if (!continueEvents())
-					break;
-			}
+			if (pos.element() == focusedChild)
+				return pos.element().charTyped(charInput);
 		}
-		return success;
+		return false;
+	}
+	@Override
+	public boolean preeditUpdated(@Nullable PreeditEvent event) {
+		if (focusedChild == null)
+			return false;
+		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
+			if (pos.element() == focusedChild)
+				return pos.element().preeditUpdated(event);
+		}
+		return false;
 	}
 	
 }

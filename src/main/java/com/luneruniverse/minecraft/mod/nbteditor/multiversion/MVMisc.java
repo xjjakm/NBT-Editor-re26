@@ -70,6 +70,7 @@ import net.minecraft.world.item.component.SuspiciousStewEffects.Entry;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.TagValueOutput;
 import org.joml.Vector2ic;
@@ -613,8 +614,8 @@ public class MVMisc {
 	}
 
 	public static boolean isSignItem(Item item) {
-		if (item instanceof net.minecraft.world.item.BlockItem)
-			return true;
+		if (item instanceof BlockItem blockItem)
+			return blockItem.getBlock() instanceof SignBlock;
 		return Version.<Boolean>newSwitch()
 				.range("1.20.0", null, () -> false)
 				.range("1.19.3", "1.19.4", () -> item instanceof HangingSignItem)
