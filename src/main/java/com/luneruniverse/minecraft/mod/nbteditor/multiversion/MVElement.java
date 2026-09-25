@@ -18,7 +18,10 @@ public interface MVElement extends GuiEventListener {
 	}
 	public default void setMultiFocused(boolean focused) {
 		Boolean prevFocused = _multiFocused.put(this, focused);
-		onMultiFocusedSet(focused, prevFocused == null ? false : prevFocused);
+		boolean prev = prevFocused == null ? false : prevFocused;
+		if (prev != focused) {
+			onMultiFocusedSet(focused, prev);
+		}
 	}
 	public default boolean isMultiFocused() {
 		return _multiFocused.getOrDefault(this, false);

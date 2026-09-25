@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -101,6 +102,23 @@ public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 		ConfigItem<V> output = new ConfigItem<>(name, value.clone(defaults), onChanged);
 		output.tooltip = tooltip;
 		return output;
+	}
+
+	@Override
+	public void setMultiFocused(boolean focused) {
+		// 手动实现 MVElement#setMultiFocused 的 default 行为，
+		// 因为 ConfigItem 通过 Configurable 间接继承 MVElement，不能用 Configurable.super 或 MVElement.super。
+		Boolean prevFocused = MVElement._multiFocused.put(this, focused);
+		onMultiFocusedSet(focused, prevFocused == null ? false : prevFocused);
+		if (value instanceof MVElement mv)
+			mv.setMultiFocused(focused);
+	}
+	
+	@Override
+	public void clearFocusRecursive() {
+		if (value instanceof MVElement mv) {
+			mv.setMultiFocused(false);
+		}
 	}
 	
 	

@@ -80,11 +80,14 @@ public abstract class ConfigGroupingHorizontal<K, T extends ConfigGroupingHorizo
 	
 	@Override
 	public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
+		clearChildFocus();
 		int xOffset = getNameWidth();
-		
+
 		for (ConfigPath path : new ArrayList<>(paths.values())) {
-			if (path.mouseClicked(new MouseButtonEvent(click.x() - xOffset, click.y(), click.buttonInfo()),doubled))
+			if (path.mouseClicked(new MouseButtonEvent(click.x() - xOffset, click.y(), click.buttonInfo()),doubled)) {
+				setChildFocused(path);
 				return true;
+			}
 			xOffset += path.getSpacingWidth() + PADDING;
 		}
 		return false;

@@ -6,12 +6,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.util.OrderedMap;
 
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.PreeditEvent;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
 public abstract class ConfigGrouping<K, T extends ConfigGrouping<K, T>> implements ConfigPathNamed {
 	
@@ -25,7 +28,18 @@ public abstract class ConfigGrouping<K, T extends ConfigGrouping<K, T>> implemen
 	
 	protected Component namePrefix;
 	protected final List<ConfigValueListener<ConfigValue<?, ?>>> onChanged;
-	
+
+	/** 当前持有输入焦点的子路径；所有键盘/IME事件只路由给它。 */
+	protected ConfigPath focusedChild;
+
+	@Override
+	public void clearFocusRecursive() {
+		for (ConfigPath path : paths.values()) {
+			path.clearFocusRecursive();
+		}
+		focusedChild = null;
+	}
+
 	protected ConfigGrouping(Component name, Constructor<K, T> cloneImpl) {
 		this.name = name;
 		this.paths = new OrderedMap<>();
@@ -100,30 +114,38 @@ public abstract class ConfigGrouping<K, T extends ConfigGrouping<K, T>> implemen
 	public abstract boolean mouseDragged(MouseButtonEvent click, double deltaX, double deltaY);
 	@Override
 	public abstract boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount);
-	
+
+	/** 清除本层所有子元素的焦点（递归）；subclass 的 mouseClicked 应在分发事件前调用。 */
+	protected void clearChildFocus() {
+		for (ConfigPath path : paths.values()) {
+			path.clearFocusRecursive();
+		}
+		focusedChild = null;
+	}
+	/** 设置新的 focusedChild；subclass 在子元素返回 true 后调用。 */
+	protected void setChildFocused(ConfigPath child) {
+		if (focusedChild != child && focusedChild instanceof MVElement mv)
+			mv.setMultiFocused(false);
+		focusedChild = child;
+		if (child instanceof MVElement mv)
+			mv.setMultiFocused(true);
+	}
+
 	@Override
 	public boolean keyPressed(KeyEvent keyInput) {
-		for (ConfigPath path : new ArrayList<>(paths.values())) {
-			if (path.keyPressed(keyInput))
-				return true;
-		}
-		return false;
+		return focusedChild != null && focusedChild.keyPressed(keyInput);
 	}
 	@Override
 	public boolean keyReleased(KeyEvent keyInput) {
-		for (ConfigPath path : new ArrayList<>(paths.values())) {
-			if (path.keyReleased(keyInput))
-				return true;
-		}
-		return false;
+		return focusedChild != null && focusedChild.keyReleased(keyInput);
 	}
 	@Override
 	public boolean charTyped(CharacterEvent charInput) {
-		for (ConfigPath path : new ArrayList<>(paths.values())) {
-			if (path.charTyped(charInput))
-				return true;
-		}
-		return false;
+		return focusedChild != null && focusedChild.charTyped(charInput);
+	}
+	@Override
+	public boolean preeditUpdated(@Nullable PreeditEvent event) {
+		return focusedChild != null && focusedChild.preeditUpdated(event);
 	}
 	
 	@Override

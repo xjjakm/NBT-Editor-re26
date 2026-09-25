@@ -112,6 +112,11 @@ public class ConfigHiddenData<S extends ConfigPath, D> implements ConfigPath {
 	}
 	
 	@Override
+	public void clearFocusRecursive() {
+		visible.clearFocusRecursive();
+	}
+	
+	@Override
 	public void tick() {
 		visible.tick();
 	}

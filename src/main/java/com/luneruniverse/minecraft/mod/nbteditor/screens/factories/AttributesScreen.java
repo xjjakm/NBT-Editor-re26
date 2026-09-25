@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigList;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPanel;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueOverlay;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueNumber;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.EntityTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
@@ -98,8 +99,8 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		List<String> orderedDisplayNames = new ArrayList<>(DISPLAY_NAME_TO_ID.keySet());
 		
 		ConfigCategory visibleBase = new ConfigCategory();
-		visibleBase.setConfigurable("attribute", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.attribute"), ConfigValueDropdown.forList(
-				firstAttribute, firstAttribute, orderedDisplayNames)));
+		visibleBase.setConfigurable("attribute", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.attribute"), ConfigValueOverlay.forList(
+				TextInst.translatable("nbteditor.attributes.attribute"), firstAttribute, firstAttribute, orderedDisplayNames)));
 		visibleBase.setConfigurable("amount", new ConfigBar()
 				.setConfigurable("number", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.base"),
 						ConfigValueNumber.forDouble(0, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY)))
@@ -110,10 +111,12 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		BASE_ATTRIBUTE_ENTRY = new ConfigHiddenDataNamed<>(visibleBase, AttributeModifierId.randomUUID(), (id, defaults) -> AttributeModifierId.randomUUID());
 		
 		ConfigCategory visible = new ConfigCategory();
-		visible.setConfigurable("attribute", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.attribute"), ConfigValueDropdown.forList(
-				firstAttribute, firstAttribute, orderedDisplayNames)));
-		visible.setConfigurable("operation", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.operation"), ConfigValueDropdown.forEnum(
-				AttributeModifierData.Operation.ADD, AttributeModifierData.Operation.ADD, AttributeModifierData.Operation.class)));
+		visible.setConfigurable("attribute", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.attribute"), ConfigValueOverlay.forList(
+				TextInst.translatable("nbteditor.attributes.attribute"), firstAttribute, firstAttribute, orderedDisplayNames)));
+		visible.setConfigurable("operation", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.operation"), ConfigValueOverlay.forList(
+				TextInst.translatable("nbteditor.attributes.operation"),
+				AttributeModifierData.Operation.ADD, AttributeModifierData.Operation.ADD,
+				Arrays.asList(AttributeModifierData.Operation.values()))));
 		visible.setConfigurable("amount", new ConfigBar()
 				.setConfigurable("number", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.amount"),
 						ConfigValueNumber.forDouble(0, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY)))
@@ -121,25 +124,27 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				.setConfigurable("min", createExtremeAmountBtn("nbteditor.attributes.amount.min", false, false))
 				.setConfigurable("infinity", createExtremeAmountBtn("nbteditor.attributes.amount.infinity", true, true))
 				.setConfigurable("negative_infinity", createExtremeAmountBtn("nbteditor.attributes.amount.negative_infinity", false, true)));
-		visible.setConfigurable("slot", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.slot"), ConfigValueDropdown.forFilteredEnum(
-				AttributeModifierData.Slot.ANY, AttributeModifierData.Slot.ANY, AttributeModifierData.Slot.class, AttributeModifierData.Slot::isInThisVersion)));
+		visible.setConfigurable("slot", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.slot"), ConfigValueOverlay.forList(
+				TextInst.translatable("nbteditor.attributes.slot"),
+				AttributeModifierData.Slot.ANY, AttributeModifierData.Slot.ANY,
+				Arrays.stream(AttributeModifierData.Slot.values()).filter(AttributeModifierData.Slot::isInThisVersion).toList())));
 		ATTRIBUTE_ENTRY = new ConfigHiddenDataNamed<>(visible, AttributeModifierId.randomUUID(), (id, defaults) -> AttributeModifierId.randomUUID());
 	}
 	@SuppressWarnings("unchecked")
-	private static ConfigValueDropdown<String> getConfigAttribute(ConfigCategory attribute) {
-		return ((ConfigItem<ConfigValueDropdown<String>>) attribute.getConfigurable("attribute")).getValue();
+	private static ConfigValueOverlay<String> getConfigAttribute(ConfigCategory attribute) {
+		return ((ConfigItem<ConfigValueOverlay<String>>) attribute.getConfigurable("attribute")).getValue();
 	}
 	@SuppressWarnings("unchecked")
-	private static ConfigValueDropdown<AttributeModifierData.Operation> getConfigOperation(ConfigCategory attribute) {
-		return ((ConfigItem<ConfigValueDropdown<AttributeModifierData.Operation>>) attribute.getConfigurable("operation")).getValue();
+	private static ConfigValueOverlay<AttributeModifierData.Operation> getConfigOperation(ConfigCategory attribute) {
+		return ((ConfigItem<ConfigValueOverlay<AttributeModifierData.Operation>>) attribute.getConfigurable("operation")).getValue();
 	}
 	@SuppressWarnings("unchecked")
 	private static ConfigValueNumber<Double> getConfigAmount(ConfigCategory attribute) {
 		return ((ConfigItem<ConfigValueNumber<Double>>) ((ConfigBar) attribute.getConfigurable("amount")).getConfigurable("number")).getValue();
 	}
 	@SuppressWarnings("unchecked")
-	private static ConfigValueDropdown<AttributeModifierData.Slot> getConfigSlot(ConfigCategory attribute) {
-		return ((ConfigItem<ConfigValueDropdown<AttributeModifierData.Slot>>) attribute.getConfigurable("slot")).getValue();
+	private static ConfigValueOverlay<AttributeModifierData.Slot> getConfigSlot(ConfigCategory attribute) {
+		return ((ConfigItem<ConfigValueOverlay<AttributeModifierData.Slot>>) attribute.getConfigurable("slot")).getValue();
 	}
 	
 	private final ConfigList attributes;

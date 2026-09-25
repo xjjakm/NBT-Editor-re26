@@ -16,6 +16,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.PreeditEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import org.joml.Matrix3x2fStack;
@@ -432,7 +433,6 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	public void setText(String text) {
 		if (this.text.equals(text))
 			return;
-		System.err.println("[NBTEditor-ST] setText called, oldLen=" + this.text.length() + " newLen=" + text.length() + " stack=" + (new Throwable().getStackTrace()[2] + ""));
 		selStart = 0;
 		selEnd = text.length();
 		write(text);
@@ -981,6 +981,14 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		}
 		return false;
 	}
+
+	// GuiEventListener 默认返回 false，会阻止 IME 组合输入（preedit 阶段）被送到本控件。
+	// 返回 true 让 Minecraft 的 KeyboardHandler 把 PreeditEvent 派发给我们，
+	// 这样中文/日文等输入法的候选窗就能正常显示和确认。
+	@Override
+	public boolean preeditUpdated(PreeditEvent event) {
+		return true;
+	}
 	
 	
 	protected void onCursorMove(int cursor, int selStart, int selEnd) {}
@@ -1019,8 +1027,6 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		if (focused == prevFocused)
 			return;
 
-		System.err.println("[NBTEditor] onMultiFocusedSet focused=" + focused + " this=" + Integer.toHexString(System.identityHashCode(this)));
-
 		// IMBlocker MinecraftFocusableWidget 直接实现
 		var container = io.github.reserveword.imblocker.common.gui.FocusContainer.MINECRAFT;
 		try {
@@ -1029,9 +1035,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 			} else {
 				container.removeFocus(this);
 			}
-			System.err.println("[NBTEditor] IMBlocker OK, focusOwner=" + io.github.reserveword.imblocker.common.gui.FocusManager.getFocusOwner());
-		} catch (Throwable t) {
-			System.err.println("[NBTEditor] IMBlocker FAILED: " + t.getClass().getSimpleName() + ": " + t.getMessage());
+		} catch (Throwable ignored) {
 		}
 	}
 	

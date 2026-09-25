@@ -90,11 +90,14 @@ public abstract class ConfigGroupingVertical<K, T extends ConfigGroupingVertical
 	
 	@Override
 	public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
+		clearChildFocus();
 		int yOffset = getNameHeight();
-		
+
 		for (ConfigPath path : new ArrayList<>(paths.values())) {
-			if (path.mouseClicked(new MouseButtonEvent(click.x() - PADDING * 2, click.y() - yOffset, click.buttonInfo()),doubled))
+			if (path.mouseClicked(new MouseButtonEvent(click.x() - PADDING * 2, click.y() - yOffset, click.buttonInfo()),doubled)) {
+				setChildFocused(path);
 				return true;
+			}
 			yOffset += path.getSpacingHeight() + PADDING;
 		}
 		return false;

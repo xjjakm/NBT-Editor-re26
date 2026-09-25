@@ -36,6 +36,10 @@ public class MVMixinPlugin extends BasicMixinPlugin {
 				.range("1.20.5", null, () -> output.add("toggled.BookScreenContentsMixin"))
 				.range(null, "1.20.4", () -> {})
 				.run();
+		Version.newSwitch()
+				.range("26.3", null, () -> output.add("toggled.ChestSpecialRendererMixin"))
+				.range(null, "26.2", () -> {})
+				.run();
 	}
 	
 }

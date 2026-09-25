@@ -170,6 +170,10 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 			return new ConfigListEntry(parent, value.clone(defaults), index, indexed);
 		}
 		
+		@Override
+		public void clearFocusRecursive() {
+			value.clearFocusRecursive();
+		}
 		
 		@Override
 		public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {

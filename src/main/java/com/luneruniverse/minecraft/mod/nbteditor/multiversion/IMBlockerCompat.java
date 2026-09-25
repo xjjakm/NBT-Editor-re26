@@ -119,16 +119,10 @@ public final class IMBlockerCompat {
 	}
 	public static Object newPoint(double guiScale, double x, double y) {
 		try {
-			if (POINT_CLASS.get() == null) {
-				System.err.println("[NBTEditor-IMBlocker] POINT_CLASS is null!");
+			if (POINT_CLASS.get() == null)
 				return null;
-			}
-			Object result = POINT_CLASS.get().getConstructor(double.class, double.class, double.class).newInstance(guiScale, x, y);
-			System.err.println("[NBTEditor-IMBlocker] newPoint scale=" + guiScale + " x=" + x + " y=" + y + " -> " + result);
-			return result;
+			return POINT_CLASS.get().getConstructor(double.class, double.class, double.class).newInstance(guiScale, x, y);
 		} catch (Throwable t) {
-			System.err.println("[NBTEditor-IMBlocker] newPoint FAILED: " + t.getClass().getSimpleName() + ": " + t.getMessage());
-			t.printStackTrace(System.err);
 			return null;
 		}
 	}

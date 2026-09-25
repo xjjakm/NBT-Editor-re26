@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -107,7 +108,9 @@ public abstract class Panel<T extends Renderable & GuiEventListener> implements 
 	
 	
 	private void clearChildFocus() {
-		if (focusedChild instanceof MVElement mv)
+		if (focusedChild instanceof ConfigPath cp)
+			cp.clearFocusRecursive();
+		else if (focusedChild instanceof MVElement mv)
 			mv.setMultiFocused(false);
 		focusedChild = null;
 	}
